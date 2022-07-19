@@ -1,0 +1,21 @@
+<% layout('layouts/boilerplate') %> 
+<% for(let artwork of artworks) {%> 
+    <div class="row">
+        <div class="col-lg-6 col-md-6 col-sm-12">
+            <div class="thumbnail">
+                <a data-fancybox="gallery" href="<%= artwork.originalUrl%>" title="Click To Enlarge"><img src="<%= artwork.thumbnailUrl%>">
+                <div class="overlay-pic">
+                </div>
+                </a>
+            </div>
+        </div>
+    </div>
+<% } %> 
+
+<div>
+    <a href="/" class="outertext">
+    <i class="fas fa-angle-left nav-arrow" aria-hidden="true">
+        <span class="hovertext">Work</span>
+    </i>
+    </a>
+</div>

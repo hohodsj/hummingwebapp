@@ -1,0 +1,21 @@
+<% layout('layouts/boilerplate') %> 
+
+<div class="row">
+<!-- Hover with text and link example -->
+    <% for(let collection of collections) { %>
+        <div class="col-md-6">
+            <div class="thumbnail"> 
+                <img src="<%= collection.cover %> ">
+                <div class="overlay">
+                <a href="/<%= collection.collectionName%> " class="work-link" title="Click To View Series">
+                    <div class="text">
+                    <p class="work-link"><%= collection.collectionName %><br/>
+                        <i class="glyphicon glyphicon-th"></i>
+                    </p>
+                    </div>
+                </a>
+                </div>
+            </div>
+        </div>
+    <% } %> 
+</div>
