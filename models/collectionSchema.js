@@ -1,14 +1,7 @@
 const mongoose = require('mongoose');
 const ArtWorkSchema = require('./artworkSchema');
+const DescriptionSchema = require('./descriptionSchema');
 const Schema = mongoose.Schema;
-
-// const ArtWork = new Schema({
-//     url: String,
-//     filename: String,
-//     width: Number,
-//     height: Number,
-//     order: Number
-// });
 
 const CollectionSchema = new Schema({
     collectionName: {
@@ -27,7 +20,11 @@ const CollectionSchema = new Schema({
     artworks: [{
         type: Schema.Types.ObjectId,
         ref: 'ArtWorkSchema'
-    }]
+    }],
+    description: {
+        type: Schema.Types. ObjectId,
+        ref: 'DescriptionSchema'
+    }
 })
 
 module.exports = mongoose.model('CollectionSchema', CollectionSchema);
