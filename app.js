@@ -23,9 +23,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use((req, res, next) => {
     res.locals.activeLocation = req.path;
     next();
-})
-
-const port = 3000;
+});
 
 app.get('/', catchAsync(async (req, res) => {
     const collections = await CollectionSchema.find({}).sort({order:1});
@@ -39,15 +37,16 @@ app.get('/about', (req, res) => {
 
 app.get('/contact', (req, res) => {
     res.render('contact');
-})
+});
 
 app.get('/:collection', catchAsync(async (req, res) => {
     const collectionName = req.params.collection;
-    const collection = await CollectionSchema.findOne({collectionName: collectionName}).populate('artworks').sort({order:1});
-    const artworks = collection.artworks;
-    res.render('collection', {artworks});
+    const collection = await CollectionSchema.findOne({collectionName: collectionName}).populate('artworks').populate('description').sort({order:1});
+    // const artworks = collection.artworks;
+    res.render('collection', {collection});
 }));
 
+const port = 3000;
 app.listen(port, () => {
     console.log(`Listening on port ${port}`);
 })

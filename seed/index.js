@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const CollectionSchema = require('../models/collectionSchema');
 const ArtWorkSchema = require('../models/artworkSchema');
+const DescriptionSchema = require('../models/descriptionSchema');
 
 mongoose.connect('mongodb://localhost:27017/hummingsang-portfolio');
 
@@ -45,9 +46,28 @@ const artworksGenerate = [
 
 ]
 
+const descriptionGenerate = [
+        {
+            title:'On My Way',
+            description:'2019\nBlack mounting board, white ink, acrylic paint, mixed media\n8 1/4 x 6 7/8 inches',
+            category:'Collection'
+        },
+        {
+            title:'Quiet Time',
+            description:'2019\nWood panel, kraft paper, white ink, acrylic paint, mixed media\n10 x 10 inches',
+            category:'Collection'
+        },
+        {
+            title:'Tranquility',
+            description:'2019\nBlack mounting board, white ink\n29 x 9 inches',
+            category:'Collection'
+        },
+]
+
 const seedDB = async() => {
     await CollectionSchema.deleteMany({});
     await ArtWorkSchema.deleteMany({});
+    await DescriptionSchema.deleteMany({});
     var collections = [];
     for(let i = 0; i < 10; i++) {
         let artworks = []
@@ -56,11 +76,14 @@ const seedDB = async() => {
             const res = await artwork.save();
             artworks.push(artwork);
         }
+        const description = new DescriptionSchema(descriptionGenerate[Math.floor(Math.random() * descriptionGenerate.length)]);
+        description.save();
         const collection = new CollectionSchema({
                 collectionName: `Colection ${i}`,
                 cover: "https://www.hummingsang.com/images/Humming-Sang/Cover%20Images/Tranquility.jpg",
                 order: i,
-                artworks: artworks
+                artworks: artworks,
+                description: description
             })
         await collection.save();
         collections.push(collection);
