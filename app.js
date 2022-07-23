@@ -1,9 +1,16 @@
 const express = require('express');
 const path = require('path');
 const ejsMate = require('ejs-mate');
+const session = require('express-session');
+const flash = require('connect-flash');
 const mongoose = require('mongoose');
 const catchAsync = require('./utils/catchAsync');
 const CollectionSchema = require('./models/collectionSchema');
+const passport = require('passport');
+const LocalStrategy = require('passport-local');
+const UserSchema = require('./models/userSchema');
+const { reduceRight } = require('mongoose/lib/helpers/query/validOps');
+const {isLoggedIn} = require('./middleware');
 
 const dbUrl = process.env.DB_URL || "mongodb://localhost:27017/hummingsang-portfolio";
 mongoose.connect(dbUrl);
@@ -18,7 +25,33 @@ app.engine('ejs', ejsMate);
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
+app.use(express.urlencoded({extended:true}));
 app.use(express.static(path.join(__dirname, 'public')));
+
+const secret = process.env.SECRET || 'ThisSecretOnlyWorksInDevEnv';
+
+const sessionConfig = {
+    name: 'session',
+    secret,
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+        httpOnly: true,
+        // secure: true,
+        expires: Date.now() + 1000 * 60 * 60 * 24 * 7,
+        maxAge:1000 * 60 * 60 * 24 * 7
+    }
+}
+
+app.use(session(sessionConfig));
+app.use(flash());
+
+app.use(passport.initialize());
+app.use(passport.session());
+passport.use(new LocalStrategy(UserSchema.authenticate()));
+passport.serializeUser(UserSchema.serializeUser());
+passport.deserializeUser(UserSchema.deserializeUser());
+
 
 app.use((req, res, next) => {
     res.locals.activeLocation = req.path;
@@ -27,7 +60,7 @@ app.use((req, res, next) => {
 
 app.get('/', catchAsync(async (req, res) => {
     const collections = await CollectionSchema.find({}).sort({order:1});
-    collections.forEach(x => console.log(JSON.stringify(x)));
+    // collections.forEach(x => console.log(JSON.stringify(x)));
     res.render('portfolio', {collections});
 }));
 
@@ -38,6 +71,28 @@ app.get('/about', (req, res) => {
 app.get('/contact', (req, res) => {
     res.render('contact');
 });
+
+app.get('/login', (req, res) => {
+    res.render('users/login')
+});
+
+// app.post('/login', 
+//     passport.authenticate('local', {failureRedirect:'/login'}),
+//     (req,res) => {
+//         console.log('post login')
+//         res.redirect('/editportfolio');
+//     }
+// );
+app.post('/login', passport.authenticate('local', {failureRedirect:'/login'}), (req, res) => {
+    console.log('post login');
+    console.log(req);
+    res.redirect('/editportfolio'); //fix redirect!!!!!
+})
+
+app.get('/editportfolio', isLoggedIn, async(req, res) => {
+    const collections = await CollectionSchema.find({}).sort({order:1});
+    res.render('users/edit-portfolio', {collections});
+})
 
 app.get('/:collection', catchAsync(async (req, res) => {
     const collectionName = req.params.collection;
