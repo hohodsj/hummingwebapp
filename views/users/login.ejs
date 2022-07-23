@@ -1,0 +1,14 @@
+<% layout('/layouts/boilerplate') %> 
+<h5 class="card-body">Login</h5>
+
+<form action="/login" method="POST" class="validated-form" novalidate>
+    <div class="mb-3">
+        <label class="form-label" for="username">Username</label>
+        <input type="text" class="form-control" id="username" name="username" autofocus required>
+    </div>
+    <div class="mb-3">
+        <label class="form-label" for="password">Password</label>
+        <input type="password" class="form-control" id="password" name="password" required>
+    </div>
+    <button class="btn btn-success col-12">Login</button>
+</form>
