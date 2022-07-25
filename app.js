@@ -11,6 +11,7 @@ const LocalStrategy = require('passport-local');
 const UserSchema = require('./models/userSchema');
 const { reduceRight } = require('mongoose/lib/helpers/query/validOps');
 const {isLoggedIn} = require('./middleware');
+const methodOverride = require('method-override');
 
 const dbUrl = process.env.DB_URL || "mongodb://localhost:27017/hummingsang-portfolio";
 mongoose.connect(dbUrl);
@@ -27,6 +28,7 @@ app.set('views', path.join(__dirname, 'views'));
 
 app.use(express.urlencoded({extended:true}));
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(methodOverride('_method'));
 
 const secret = process.env.SECRET || 'ThisSecretOnlyWorksInDevEnv';
 
@@ -59,7 +61,7 @@ app.use((req, res, next) => {
 });
 
 app.get('/', catchAsync(async (req, res) => {
-    const collections = await CollectionSchema.find({}).sort({order:1});
+    const collections = await CollectionSchema.find({}).populate('cover').sort({order:1});
     // collections.forEach(x => console.log(JSON.stringify(x)));
     res.render('portfolio', {collections});
 }));
@@ -76,28 +78,29 @@ app.get('/login', (req, res) => {
     res.render('users/login')
 });
 
-// app.post('/login', 
-//     passport.authenticate('local', {failureRedirect:'/login'}),
-//     (req,res) => {
-//         console.log('post login')
-//         res.redirect('/editportfolio');
-//     }
-// );
 app.post('/login', passport.authenticate('local', {failureRedirect:'/login'}), (req, res) => {
     console.log('post login');
     console.log(req);
-    res.redirect('/editportfolio'); //fix redirect!!!!!
+    res.redirect('/editportfolio');
 })
 
 app.get('/editportfolio', isLoggedIn, async(req, res) => {
-    const collections = await CollectionSchema.find({}).sort({order:1});
+    const collections = await CollectionSchema.find({}).populate('cover').sort({order:1});
     res.render('users/edit-portfolio', {collections});
+})
+
+app.delete('/:collection', isLoggedIn, async(req, res) => {
+    const {collection} = req.params;
+    await CollectionSchema.findOneAndDelete({collectionName: collection});
+    
+    res.redirect('/editportfolio');
 })
 
 app.get('/:collection', catchAsync(async (req, res) => {
     const collectionName = req.params.collection;
     const collection = await CollectionSchema.findOne({collectionName: collectionName}).populate('artworks').populate('description').sort({order:1});
     // const artworks = collection.artworks;
+
     res.render('collection', {collection});
 }));
 

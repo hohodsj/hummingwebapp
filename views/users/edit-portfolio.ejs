@@ -1,22 +1,36 @@
 <% layout('layouts/boilerplate') %> 
-<p>You must be login to see this Change this to flash later</p>
+<p>You must be login to see this TODO: Change this to flash later and add edit boiler plate</p>
 <div class="row">
 <!-- Hover with text and link example -->
+    <p>Showing art works</p>
     <% for(let collection of collections) { %>
         <div class="col-md-6">
             <div class="thumbnail"> 
-                <img src="<%= collection.cover %> ">
-                <div class="overlay">
-                <a href="/<%= collection.collectionName%> " class="work-link" title="Click To View Series">
-                    <div class="text">
-                    <p class="work-link"><%= collection.collectionName %><br/>
-                        <i class="glyphicon glyphicon-th"></i>
-                    </p>
-                    </div>
-                </a>
+                <img src="<%= collection.cover.thumbnailUrl %> ">
+                <div class="overlay" style= "width: <%= collection.cover.thumbnailWidth + 15 %>px; height: <%= collection.cover.thumbnailHeight + 15 %>px;">
+                    <a href="/<%= collection.collectionName%> " class="work-link" title="Click To View Series">
+                        <div class="text" style= "width: <%= collection.cover.thumbnailWidth + 15 %>px; height: <%= collection.cover.thumbnailHeight + 15 %>px;">
+                            <p class="work-link"><%= collection.collectionName %><br/>
+                                <i class="glyphicon glyphicon-th"></i>
+                            </p>
+                        </div>
+                    </a>
                 </div>
             </div>
+
+            <form action="/<%= collection.collectionName %>?_method=DELETE" method="POST" style="margin-bottom: 25px">
+                <label for="name">Name</label>
+                <input type="text" class="form-control" value="<%= collection.collectionName %> ">
+                <button type="btn" class="btn btn-danger" value="<%= collection.collectionName %>">Delete</button>
+            </form>
         </div>
+        
     <% } %> 
 </div>
 
+<script>
+    let buttons = document.querySelectorAll('.btn-danger');
+    buttons.forEach(button => {
+        button.onclick = (event) => confirm(`You are about to delete the collection ${button.value}, do you want to proceed?`);
+    })
+</script>

@@ -5,10 +5,10 @@
     <% for(let collection of collections) { %>
         <div class="col-md-6">
             <div class="thumbnail"> 
-                <img src="<%= collection.cover %> ">
-                <div class="overlay">
+                <img src="<%= collection.cover.thumbnailUrl%> ">
+                <div class="overlay" style= "width: <%= collection.cover.thumbnailWidth + 15 %>px; height: <%= collection.cover.thumbnailHeight + 15 %>px;">
                 <a href="/<%= collection.collectionName%> " class="work-link" title="Click To View Series">
-                    <div class="text">
+                    <div class="text" style= "width: <%= collection.cover.thumbnailWidth + 15 %>px; height: <%= collection.cover.thumbnailHeight + 15 %>px;">
                     <p class="work-link"><%= collection.collectionName %><br/>
                         <i class="glyphicon glyphicon-th"></i>
                     </p>
