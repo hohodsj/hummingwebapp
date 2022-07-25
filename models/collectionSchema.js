@@ -10,8 +10,8 @@ const CollectionSchema = new Schema({
         unique: true
     },
     cover: {
-        type: String,
-        required: true
+        type: Schema.Types.ObjectId,
+        ref:"ArtWorkSchema"
     },
     order: {
         type: Number,
@@ -24,6 +24,17 @@ const CollectionSchema = new Schema({
     description: {
         type: Schema.Types. ObjectId,
         ref: 'DescriptionSchema'
+    }
+})
+
+CollectionSchema.post('findOneAndDelete', async function(collection) {
+    if(collection) {
+        await ArtWorkSchema.deleteMany({
+            _id: {
+                $in:collection.artworks
+            }
+        })
+        await ArtWorkSchema.deleteOne({_id:collection.cover._id})
     }
 })
 

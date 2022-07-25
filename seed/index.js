@@ -17,6 +17,8 @@ const artworksGenerate = [
             filename: "On My Way",
             originalWidth: 1280,
             originalHeight: 852,
+            thumbnailWidth: 555,
+            thumbnailHeight: 370,
             order: 1
         },
         {
@@ -25,6 +27,8 @@ const artworksGenerate = [
             filename: "Quiet Time ",
             originalWidth: 1280,
             originalHeight: 853,
+            thumbnailWidth: 555,
+            thumbnailHeight: 370,
             order: 2
         },
         {
@@ -33,6 +37,8 @@ const artworksGenerate = [
             filename: "Hidden",
             originalWidth: 1315,
             originalHeight: 877,
+            thumbnailWidth: 555,
+            thumbnailHeight: 370,
             order: 3
         },
         {
@@ -41,6 +47,8 @@ const artworksGenerate = [
             filename: "Hidden",
             originalWidth: 1315,
             originalHeight: 877,
+            thumbnailWidth: 555,
+            thumbnailHeight: 370,
             order: 4
         },
 
@@ -64,23 +72,24 @@ const descriptionGenerate = [
         },
 ]
 
-const seedDB = async() => {
+const seedDB = async(howManyCollections) => {
     await CollectionSchema.deleteMany({});
     await ArtWorkSchema.deleteMany({});
     await DescriptionSchema.deleteMany({});
     var collections = [];
-    for(let i = 0; i < 10; i++) {
+    for(let i = 0; i < howManyCollections; i++) {
         let artworks = []
         for(let j = 0; j < Math.max(1,Math.floor(Math.random() * artworksGenerate.length)); j++) {
-            const artwork = new ArtWorkSchema(artworksGenerate[j]);
-            const res = await artwork.save();
+            const randomSelectedArtwork = artworksGenerate[Math.floor(Math.random() * artworksGenerate.length)];
+            const artwork = new ArtWorkSchema(randomSelectedArtwork);
+            await artwork.save();
             artworks.push(artwork);
         }
         const description = new DescriptionSchema(descriptionGenerate[Math.floor(Math.random() * descriptionGenerate.length)]);
         description.save();
         const collection = new CollectionSchema({
-                collectionName: `Colection ${i}`,
-                cover: "https://www.hummingsang.com/images/Humming-Sang/Cover%20Images/Tranquility.jpg",
+                collectionName: `Collection ${i}`,
+                cover: artworks[Math.floor(Math.random() * artworks.length)],
                 order: i,
                 artworks: artworks,
                 description: description
@@ -90,7 +99,7 @@ const seedDB = async() => {
     }
 }
 
-seedDB().then(() => {
+seedDB(10).then(() => {
     mongoose.connection.close();
 })
 

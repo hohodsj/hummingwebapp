@@ -22,6 +22,14 @@ const ArtWorkSchema = new Schema({
         type: Number,
         required: true
     }, 
+    thumbnailWidth: {
+        type: Number,
+        required: true
+    },
+    thumbnailHeight: {
+        type: Number,
+        required: true
+    },
     order:{
         type: Number,
         required: true
