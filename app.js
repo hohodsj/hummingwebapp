@@ -75,25 +75,29 @@ app.get('/contact', (req, res) => {
 });
 
 app.get('/login', (req, res) => {
-    res.render('users/login')
+    res.render('admin/login')
 });
 
 app.post('/login', passport.authenticate('local', {failureRedirect:'/login'}), (req, res) => {
     console.log('post login');
     console.log(req);
-    res.redirect('/editportfolio');
+    res.redirect('/admin/portfolio');
 })
 
-app.get('/editportfolio', isLoggedIn, async(req, res) => {
+app.get('/admin/portfolio', isLoggedIn, async(req, res) => {
     const collections = await CollectionSchema.find({}).populate('cover').sort({order:1});
-    res.render('users/edit-portfolio', {collections});
+    res.render('admin/edit-portfolio', {collections});
+})
+
+app.get('/admin/create-collection', isLoggedIn, async(req, res) => {
+    res.render('admin/create-collection');
 })
 
 app.delete('/:collection', isLoggedIn, async(req, res) => {
     const {collection} = req.params;
     await CollectionSchema.findOneAndDelete({collectionName: collection});
-    
-    res.redirect('/editportfolio');
+    // add flash message
+    res.redirect('/admin/portfolio');
 })
 
 app.get('/:collection', catchAsync(async (req, res) => {

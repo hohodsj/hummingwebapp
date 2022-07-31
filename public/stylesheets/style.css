@@ -15,6 +15,33 @@ h1  {
   margin-bottom: 0px;
 }
 
+.col {
+  position: relative;
+}
+
+.overlay {
+  position: absolute;
+  top: 0px;
+  bottom: 0;
+  left: 0px;
+  right: 0;
+  height: 100%;
+  width: 100%;
+  opacity: 0;
+  transition: .5s ease;
+  background-color:rgba(0,0,0,1);
+}
+
+.overlay:hover {
+  opacity: 0.4;
+}
+
+.overlay-text {
+  text-align: center;
+  position: relative;
+  top: 50%;
+  color: #fff;
+}
 
 /*Make CV Work Contact Center*/
 #menu {
@@ -427,12 +454,13 @@ input{
 
 /*Attribute affects index.html(work)*/
 /*thumbnail no white spacing:pic no fram*/
+/*
 .thumbnail{
 	padding: 0;
   border:0 none;
   box-shadow: none;
 }
-
+*/
 /*Sculpture, Drawing, Photography Set-Design text show when higlight*/
 .text {
   color: white;
@@ -446,7 +474,7 @@ input{
   /*width:100%;
   height:100%;*/
 }
-
+/*
 .overlay-pic {
   position: absolute;
   top: -10px;
@@ -463,21 +491,11 @@ input{
 .overlay-pic:hover {
   opacity: 0.4;
 }
-
+*/
 /*hover on project and show name*/
-.overlay {
-  position: absolute;
-  top: -10px;
-  bottom: 0;
-  left: 10px;
-  right: 0;
-  height: 100%;
-  width: 100%;
-  opacity: 0;
-  transition: .5s ease;
-  background-color:rgba(0,0,0,1);
-}
 
+
+/*
 @media(max-width: 1200px){
   .overlay {
     top:-5px;
@@ -493,9 +511,9 @@ input{
     background-color:rgba(0,0,0,0);
   }
 }
-.overlay:hover {
-  opacity: 0.4;
-}
+*/
+
+
 
 .work-link{
   font-size: 28px; 
