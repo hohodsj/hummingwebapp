@@ -39,8 +39,10 @@ h1  {
 .overlay-text {
   text-align: center;
   position: relative;
-  top: 50%;
+  top: 45%;
   color: #fff;
+  font-size: 28px;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
 }
 
 /*Make CV Work Contact Center*/
