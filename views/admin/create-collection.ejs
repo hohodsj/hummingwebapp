@@ -1,0 +1,19 @@
+<!-- <% layout('layouts/boilerplate') %> 
+<div class="row">
+    <form action="">
+        <label class="form-label" for="collectionName">Name</label>
+        <input class="form-control" type="text" name="collectionSchema[collectionName]">
+    </form>
+</div> -->
+
+<h1>Create Collection</h1>
+<form action="">
+    <label class="form-label" for="title">Title</label>
+    <input class="form-control" type="text" name="title">
+    <label class="form-label" for="description">Description</label>
+    <textarea class="form-control" type="text" name="description" id="description" cols="30" rows="10"></textarea>
+    <div class="file-upload-wrapper">
+        <input type="file" id="input-file-now" class="file-upload" multiple/>
+    </div>
+</form>
+
