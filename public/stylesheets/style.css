@@ -45,6 +45,37 @@ h1  {
   font-family: Verdana, Geneva, Tahoma, sans-serif;
 }
 
+.navbar-tag{
+  margin-left: 40px;
+  margin-right: 40px;
+  margin-top: 20px;
+  text-align: center;
+  font-family: Expletus Sans;
+  font-size: 28px;
+  font-weight: bold;
+  color:#8D8A86 !important;
+}
+
+.navbar-tag:hover {
+  color: #f8bab7 !important;
+  text-decoration: none;
+}  
+
+.nav-light .navbar-toggler
+{
+  outline:none;
+  box-shadow: none;
+  border-style: none;
+}
+
+.nav-font {
+  font-family: Expletus Sans;
+  font-stretch: 200%;
+}
+/*
+-----------------------------------
+*/
+
 /*Make CV Work Contact Center*/
 #menu {
   text-align: center;
@@ -66,12 +97,14 @@ a:hover {
 
 /*nav bar changes*/
 /*background match body*/
+/*
 .navbar-default{
   background:#f4f0ee;
 
 }
+*/
+/*
 .navbar.navbar-default {
-    /*background-color: #99ccff;*/
     border: 0;
     -webkit-box-shadow: none;
     box-shadow: none;
@@ -82,24 +115,11 @@ a:hover {
     -webkit-box-shadow: none;
     box-shadow: none;
 }
+*/
 
 /*navbar buttons CV Work Contact Attributes*/
-.navbar-tag{
-  margin-left: 40px;
-  margin-right: 40px;
-  margin-top: 20px;
-  text-align: center;
-  font-family: Expletus Sans;
-  font-size: 28px;
-  font-weight: bold;
-  /*text-transform: uppercase;*/
-  /*word-spacing:5em; */
-  color:#8D8A86 !important;
-}
-.navbar-tag:hover {
-  color: #f8bab7 !important;
-  text-decoration: none;
-}  
+
+
 
 /*Hover with text*/
 .internal-link-style{
@@ -154,62 +174,68 @@ a:hover {
     color:#f8bab7;
 }
 
-
+/*
 .navbar-tag-inner{
   text-align: center;
   font-weight: bold;
-  /*text-transform: uppercase;*/
-  /*word-spacing:5em; */
   color:#8D8A86 !important;
 }
 .navbar-tag-inner:hover {
     color: #f8bab7 !important;
     text-decoration: none;
 }  
+*/
 
 /*Center the navbar*/
+/*
 .navbar .navbar-nav {
   display: inline-block;
   float: none;
   vertical-align: top;
 }
+*/
+
 
 .navbar .navbar-collapse {
   text-align: center;
 }
 
+/*
 .navbar-toggle {
-  /*width: 100%;*/
   float: right;
   margin-right: 25px;
   margin-top: -90px;
   padding: 0;
 }
+*/
 
 /*style the menu icon */
+/*icon bar size change here*/
+/*
 .navbar-toggle .icon-bar {
-  /*icon bar size change here*/
+  
   height: 6px;
   width: 50px;
   margin-top: 10px !important;
   margin-bottom: 10px !important;
-  /*round menu icon at both ends*/
   border-radius: 5px !important;
 }
 
 .navbar-default .navbar-toggle {
   border-color:#f4f0ee;
 }
-
+*/
 /*style menu icon*/
+/*
 .navbar-default .navbar-toggle .icon-bar {
     background-color: #8D8A86;
 }
-
+*/
+/*
 .navbar-collapse {
   margin-left: 30%
 }
-
+*/
 .icon-bar{
   margin-left:0;
   margin-right:0;
@@ -291,9 +317,11 @@ a:hover {
   h1{
     font-size:70px;
   }
+  
   .navbar-header {
       float: none;
   }
+  /*
   .navbar-left,.navbar-right {
       float: none !important;
   }
@@ -325,13 +353,15 @@ a:hover {
   .collapse.in{
       display:block !important;
   }
-
+  */
 }
 
 @media (max-width: 650px){
+  /*
   .navbar-toggle {
     margin-top:0;
   }
+  */
 }
 
 
