@@ -18,6 +18,7 @@ const multer = require("multer");
 const {storage} = require('./cloudinary');
 const upload = multer({storage});
 // const upload = multer({dest: 'uploads/'});
+const {createCollection} = require("./controllers/collectionsController");
 
 const dbUrl = process.env.DB_URL || "mongodb://localhost:27017/hummingsang-portfolio";
 mongoose.connect(dbUrl);
@@ -95,13 +96,16 @@ app.get('/admin/portfolio', isLoggedIn, async(req, res) => {
     res.render('admin/edit-portfolio', {collections});
 })
 
-app.get('/admin/create-collection', async(req, res) => {
+app.get('/admin/create-collection', isLoggedIn, async(req, res) => {
     res.render('admin/create-collection');
 })
 
-app.post('/admin/create-collection', upload.array('image'), async(req, res) => {
-    res.redirect('/admin/portfolio');
-})
+// app.post('/admin/create-collection', isLoggedIn, upload.array('image'), async(req, res) => {
+//     console.log(req.files);
+//     res.redirect('/admin/portfolio');
+// })
+
+app.post('/admin/create-collection', isLoggedIn, upload.array('image'), createCollection);
 
 app.delete('/:collection', isLoggedIn, async(req, res) => {
     const {collection} = req.params;
