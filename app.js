@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const ejsMate = require('ejs-mate');
@@ -12,6 +13,11 @@ const UserSchema = require('./models/userSchema');
 const { reduceRight } = require('mongoose/lib/helpers/query/validOps');
 const {isLoggedIn} = require('./middleware');
 const methodOverride = require('method-override');
+var {google} = require('googleapis')
+const multer = require("multer");
+const {storage} = require('./cloudinary');
+const upload = multer({storage});
+// const upload = multer({dest: 'uploads/'});
 
 const dbUrl = process.env.DB_URL || "mongodb://localhost:27017/hummingsang-portfolio";
 mongoose.connect(dbUrl);
@@ -89,8 +95,12 @@ app.get('/admin/portfolio', isLoggedIn, async(req, res) => {
     res.render('admin/edit-portfolio', {collections});
 })
 
-app.get('/admin/create-collection', isLoggedIn, async(req, res) => {
+app.get('/admin/create-collection', async(req, res) => {
     res.render('admin/create-collection');
+})
+
+app.post('/admin/create-collection', upload.array('image'), async(req, res) => {
+    res.redirect('/admin/portfolio');
 })
 
 app.delete('/:collection', isLoggedIn, async(req, res) => {
