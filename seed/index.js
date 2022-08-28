@@ -2,6 +2,9 @@ const mongoose = require('mongoose');
 const CollectionSchema = require('../models/collectionSchema');
 const ArtWorkSchema = require('../models/artworkSchema');
 const DescriptionSchema = require('../models/descriptionSchema');
+const fs = require('fs');
+const path = require('path');
+const googleDriveUtils = require('../utils/googleDriveUtil');
 
 mongoose.connect('mongodb://localhost:27017/hummingsang-portfolio');
 
@@ -10,6 +13,7 @@ db.on("error", console.error.bind(console, "connection error:"));
 db.once("open", () => {
     console.log("Database connected");
 })
+
 const artworksGenerate = [
         {
             thumbnailUrl:"https://d33wubrfki0l68.cloudfront.net/06abf97c8574f0627e23e76383d6408fff21169e/1d53b/images/humming-sang/onmyway/1-sm.jpg",
@@ -76,11 +80,11 @@ const seedDB = async(howManyCollections) => {
     await CollectionSchema.deleteMany({});
     await ArtWorkSchema.deleteMany({});
     await DescriptionSchema.deleteMany({});
+    console.log(artworks);
     var collections = [];
     for(let i = 0; i < howManyCollections; i++) {
         let artworks = []
         for(let j = 0; j < Math.max(1,Math.floor(Math.random() * artworksGenerate.length)); j++) {
-            const randomSelectedArtwork = artworksGenerate[Math.floor(Math.random() * artworksGenerate.length)];
             const artwork = new ArtWorkSchema(randomSelectedArtwork);
             await artwork.save();
             artworks.push(artwork);
@@ -99,30 +103,22 @@ const seedDB = async(howManyCollections) => {
     }
 }
 
-seedDB(10).then(() => {
-    mongoose.connection.close();
-})
+// seedDB(10).then(() => {
+//     mongoose.connection.close();
+// })
 
 
-const testArtWork = async() => {
-    await ArtWorkSchema.deleteMany({});
-    let artworkCollection = []
-    for(let j = 0; j < 4; j++) {
-        console.log('ith artwork')
-        console.log(artworksGenerate[j])
-        const artwork = new ArtWorkSchema(artworksGenerate[j]);
-        console.log('artwork');
-        console.log(artwork);
-        const res = await artwork.save();
-        console.log(`artwork save status ${res}`);
-        artworks.push(artwork);
+const seedDB2 = async(howManyCollections) => {
+    const directoryPath = path.join(__dirname, 'testuploads');
+    const artworks = fs.readdirSync(directoryPath);
+    const length = artworks.length;
+    for(let i = 0; i < howManyCollections; i++) {
+        const selectedImage = artworks[Math.floor(Math.random() * length)];
+        const imgPath = path.join(directoryPath, selectedImage);
+        const buffer = new Uint8Array(Buffer.from(imgPath)); // needs to figure out buffer
+        const [thumbnailId, imgId] = await googleDriveUtils.uploadImageToDrive(buffer, selectedImage.split('.').pop(), 'test');
+        console.log(thumbnailId, imgId);
     }
-    console.log("artworks");
-    console.log(artworks);
 }
-/*
-testArtWork().then(() => {
-    mongoose.connection.close();
-})
-*/
+seedDB2(1)
 

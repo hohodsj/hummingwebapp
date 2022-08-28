@@ -8,10 +8,6 @@ const DescriptionSchema = new Schema({
     description: {
         type: String
     },
-    order: {
-        type: Number,
-        default: 0
-    },
     category: {
         type: String,
         enum: ['CV', 'Collection'],
