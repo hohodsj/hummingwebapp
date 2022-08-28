@@ -8,7 +8,7 @@ module.exports.createCollection = async(req, res, next) => {
     // thumbnail Url for artwork
     const artworks = req.files.map(artwork => new artworksSchema({
         thumbnailUrl: artwork.path,
-        originalUrl: artwork.path,
+        imageUrl: artwork.path,
         filename: artwork.filename,
     }))
 }

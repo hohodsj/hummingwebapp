@@ -2,38 +2,29 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const ArtWorkSchema = new Schema({
-    thumbnailUrl: {
-        type: String,
-        required: true
+    thumbnailId: {
+        type: String
     },
-    originalUrl: {
-        type: String,
-        required: true,
+    imageId: {
+        type: String
     },
-    filename:{
-        type: String,
-        required: true
-    },
-    originalWidth:{
-        type: Number,
-        required: true
-    },
-    originalHeight:{
-        type: Number,
-        required: true
-    }, 
-    thumbnailWidth: {
-        type: Number,
-        required: true
-    },
-    thumbnailHeight: {
-        type: Number,
-        required: true
+    fileName:{
+        type: String
     },
     order:{
-        type: Number,
-        required: true
-    } 
+        type: Number
+    },
+    createDate: {
+        type: Date
+    }
 });
+
+ArtWorkSchema.virtual('thumbnailUrl').get(function() {
+    return `https://drive.google.com/uc?id=${this.thumbnailId}`;
+});
+
+ArtWorkSchema.virtual('imageUrl').get(function() {
+    return `https://drive.google.com/uc?id=${this.imageId}`;
+})
 
 module.exports = mongoose.model('ArtWorkSchema', ArtWorkSchema);

@@ -6,23 +6,23 @@ const session = require('express-session');
 const flash = require('connect-flash');
 const mongoose = require('mongoose');
 const catchAsync = require('./utils/catchAsync');
+const ArtWorkSchema = require('./models/artworkSchema');
 const CollectionSchema = require('./models/collectionSchema');
+const DescriptionSchema = require('./models/descriptionSchema');
 const passport = require('passport');
 const LocalStrategy = require('passport-local');
 const UserSchema = require('./models/userSchema');
-const { reduceRight } = require('mongoose/lib/helpers/query/validOps');
 const {isLoggedIn} = require('./middleware');
 const methodOverride = require('method-override');
-var {google} = require('googleapis')
+
 const multer = require("multer");
-// const {storage} = require('./cloudinary');
 const storage = multer.memoryStorage();
 const upload = multer({storage});
-// const upload = multer({dest: 'uploads/'});
 const {createCollection} = require("./controllers/collectionsController");
 const sharp = require('sharp');
 const fs = require('fs');
-const GoogleDriveStorage = require('multer-google-drive');
+const uuid = require('uuid');
+const googleDriveUtil = require('./utils/googleDriveUtil');
 
 
 const dbUrl = process.env.DB_URL || "mongodb://localhost:27017/hummingsang-portfolio";
@@ -105,13 +105,7 @@ app.get('/admin/create-collection', async(req, res) => {
     res.render('admin/create-collection');
 })
 
-// app.post('/admin/create-collection', isLoggedIn, upload.array('image'), async(req, res) => {
-//     console.log(req.files);
-//     res.redirect('/admin/portfolio');
-// })
-
-// app.post('/admin/create-collection', isLoggedIn, upload.array('image'), createCollection);
-app.post('/admin/create-collection', upload.single('image'), async (req, res) => {
+app.post('/admin/create-collection', upload.array('image'), async (req, res) => {
     console.log('file', req.file);
     console.log('body', req.body);
     fs.access('./uploads', (err) => {
@@ -119,49 +113,39 @@ app.post('/admin/create-collection', upload.single('image'), async (req, res) =>
             fs.mkdir('./uploads');
         }
     })
-    await sharp(req.file.buffer).resize({width: 100, height: 100}).toFile('./uploads/' + req.file.originalname);
-});
-
-app.get('/gd', async (req,res) => {
-    const clientId = process.env.GOOGLE_DRIVE_CLIENT_ID;
-    const clientSecret = process.env.GOOGLE_DRIVE_CLIENT_SECRET;
-    const redirectUrl = process.env.GOOGLE_DRIVE_REDIRECT_URL;
-    const refreshToken = process.env.GOOGLE_DRIVE_REFRESH_TOKEN;
-    const client = new google.auth.OAuth2(clientId, clientSecret, redirectUrl);
-    client.setCredentials({ refresh_token: refreshToken });
-    const drive = google.drive({version: 'v3', auth:client});
-    try{
-        /*
-        const folderRsp = await drive.files.create({
-            resource: {
-                name: 'test',
-                mimeType: 'application/vnd.google-apps.folder',
-            },
-            fields: 'id,name',
-        });
-        console.log(`id: ${folderRsp.data.id}`);
-        */
-
-        // able to upload, need to put them in folder, and public accessiable
-        const response = await drive.files.create({
-            requestBody: {
-                name:"a.png",
-                mimeType: "image/png",
-                //parents: ['1GHTRmOK7cJcNjw_LqJU6Nve4s20Mn0RU']
-                parents: ['1cMJU3pMr110fmsIMRIgwCMozEF_uzeIY']
-            },
-            media: {
-                mimeType: "image/png",
-                body: fs.createReadStream("./uploads/a.png")
-            }
+    //await sharp(req.file.buffer).resize({width: 100, height: 100}).toFile('./uploads/' + req.file.originalname);
+    let artworks = [];
+    for(let i = 0; i < req.files.length; i++) {
+        const file = req.files[i];
+        const [thumbnailId, imageId] = await googleDriveUtil.uploadImageToDrive(file.buffer, file.originalname.split('.').pop());
+        const artwork = new ArtWorkSchema({
+            thumbnailId: thumbnailId,
+            imageId: imageId,
+            fileName: file.originalname,
+            order: i,
+            createDate: new Date()
         })
-        console.log(response.data);
-    } catch (error) {
-        console.log(error.message);
+        await artwork.save();
+        artworks.push(artwork);
     }
-    
-    res.redirect('/');
-})
+    const description = new DescriptionSchema({
+        title: req.body.collectionName,
+        description: req.body.description,
+        category: 'Collection'
+    });
+    description.save();
+    const collection = new CollectionSchema({
+        collectionName: req.body.collectionName,
+        cover: artworks[0],
+        order: 0,
+        artworks: artworks,
+        description: description,
+        updateDate: new Date()
+    });
+
+    await collection.save();
+    res.redirect('/admin/create-collection');
+});
 
 
 app.delete('/:collection', isLoggedIn, async(req, res) => {

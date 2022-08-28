@@ -24,6 +24,9 @@ const CollectionSchema = new Schema({
     description: {
         type: Schema.Types. ObjectId,
         ref: 'DescriptionSchema'
+    },
+    updateDate: {
+        type: Date
     }
 })
 
