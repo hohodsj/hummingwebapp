@@ -11,7 +11,7 @@
                     <p class="overlay-text"><%=collection.collectionName%> <br> <i class="fa-solid fa-grip"></i></p> 
                 </div> -->
             </a>
-            <form action="/<%= collection.collectionName %>?_method=DELETE" method="POST" style="margin-bottom: 25px">
+            <form action="/admin/<%= collection.collectionName %>?_method=DELETE" method="POST" style="margin-bottom: 25px">
                 <label for="name">Name</label>
                 <input type="text" class="form-control" value="<%= collection.collectionName %> ">
                 <button type="btn" class="btn btn-danger" value="<%= collection.collectionName %>">Delete</button>

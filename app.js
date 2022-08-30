@@ -12,18 +12,10 @@ const DescriptionSchema = require('./models/descriptionSchema');
 const passport = require('passport');
 const LocalStrategy = require('passport-local');
 const UserSchema = require('./models/userSchema');
-const {isLoggedIn} = require('./middleware');
 const methodOverride = require('method-override');
 
-const multer = require("multer");
-const storage = multer.memoryStorage();
-const upload = multer({storage});
-const {createCollection} = require("./controllers/collectionsController");
-const sharp = require('sharp');
-const fs = require('fs');
-const uuid = require('uuid');
-const googleDriveUtil = require('./utils/googleDriveUtil');
 
+const adminRoutes = require('./routes/admin');
 
 const dbUrl = process.env.DB_URL || "mongodb://localhost:27017/hummingsang-portfolio";
 mongoose.connect(dbUrl);
@@ -96,6 +88,8 @@ app.post('/login', passport.authenticate('local', {failureRedirect:'/login'}), (
     res.redirect('/admin/portfolio');
 })
 
+app.use('/admin', adminRoutes);
+/*
 app.get('/admin/portfolio', isLoggedIn, async(req, res) => {
     const collections = await CollectionSchema.find({}).populate('cover').sort({order:1});
     res.render('admin/edit-portfolio', {collections});
@@ -154,7 +148,7 @@ app.delete('/:collection', isLoggedIn, async(req, res) => {
     // add flash message
     res.redirect('/admin/portfolio');
 })
-
+*/
 app.get('/:collection', catchAsync(async (req, res) => {
     const collectionName = req.params.collection;
     const collection = await CollectionSchema.findOne({collectionName: collectionName}).populate('artworks').populate('description').sort({order:1});
