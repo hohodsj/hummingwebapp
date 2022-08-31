@@ -9,7 +9,7 @@ const storage = multer.memoryStorage();
 const upload = multer({storage});
 const googleDriveUtil = require('../utils/googleDriveUtil');
 
-router.get('/portfolio', isLoggedIn, async(req, res) => {
+router.get('/portfolio', async(req, res) => {
     const collections = await CollectionSchema.find({}).populate('cover').sort({order:1});
     res.render('./admin/edit-portfolio', {collections});
 });
@@ -52,9 +52,15 @@ router.route('/create-collection')
         res.redirect('/admin/create-collection');
     })
 
-router.delete('/:collection', isLoggedIn, async(req, res) => {
+router.delete('/:collection', async(req, res) => {
     const {collection} = req.params;
-    await CollectionSchema.findOneAndDelete({collectionName: collection});
+    const collectionAndArtworks = await CollectionSchema.findOne({collectionName: collection}).populate('artworks');
+    const ids = collectionAndArtworks.artworks.reduce( (acc, cur) => {
+        return acc.concat([cur.thumbnailId, cur.imageId]);
+    }, [])
+    console.log(ids);
+    googleDriveUtil.deleteImageWithIds(ids);
+    //await CollectionSchema.findOneAndDelete({collectionName: collection});
     // add flash message
     res.redirect('/admin/portfolio');
 })
