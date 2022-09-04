@@ -11,6 +11,10 @@ const ArtWorkSchema = new Schema({
     fileName:{
         type: String
     },
+    collectionSchema: {
+        type: Schema.Types.ObjectId,
+        ref: 'CollectionsSchema'
+    },
     order:{
         type: Number
     },

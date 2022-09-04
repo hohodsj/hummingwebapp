@@ -13,6 +13,7 @@ const passport = require('passport');
 const LocalStrategy = require('passport-local');
 const UserSchema = require('./models/userSchema');
 const methodOverride = require('method-override');
+const bodyParser = require('body-parser');
 
 
 const adminRoutes = require('./routes/admin');
@@ -31,6 +32,7 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
 app.use(express.urlencoded({extended:true}));
+app.use(bodyParser.text());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(methodOverride('_method'));
 
@@ -61,6 +63,8 @@ passport.deserializeUser(UserSchema.deserializeUser());
 
 app.use((req, res, next) => {
     res.locals.activeLocation = req.path;
+    res.locals.success = req.flash('success');
+    res.locals.error = req.flash('error');
     next();
 });
 
@@ -82,7 +86,7 @@ app.get('/login', (req, res) => {
     res.render('admin/login')
 });
 
-app.post('/login', passport.authenticate('local', {failureRedirect:'/login'}), (req, res) => {
+app.post('/login', passport.authenticate('local', {failureFlash: true, failureRedirect:'/login'}), (req, res) => {
     console.log('post login');
     console.log(req);
     res.redirect('/admin/portfolio');

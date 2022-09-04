@@ -5,7 +5,7 @@
     <p>Showing art works</p>
     <% for(let collection of collections) { %>
         <div class="col col-12 col-md-6 p-3">
-            <a href="/<%= collection.collectionName%> " title="Click To View Series">
+            <a href="/admin/<%= collection.collectionName%> " title="Click To View Series">
                 <img src="<%= collection.cover.thumbnailUrl%>" class="img-thumbnail p-0">
                 <!-- <div class="overlay">
                     <p class="overlay-text"><%=collection.collectionName%> <br> <i class="fa-solid fa-grip"></i></p> 
@@ -21,6 +21,9 @@
 </div>
 <form action="/admin/create-collection" class="position-fixed bottom-0 end-0 mb-5 mx-4" method="GET">
     <button class="btn btn-success">+</button>
+</form>
+<form action="/admin/all?_method=DELETE" method="POST" style="margin-bottom: 25px">
+    <button type="btn" class="btn btn-danger">Delete All</button>
 </form>
 
 <script>

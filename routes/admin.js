@@ -1,5 +1,5 @@
 const express = require('express');
-const { isLoggedIn, createUploadFolder } = require('../middleware');
+const { isLoggedIn, createUploadFolder, isCollectionExists } = require('../middleware');
 const router = express.Router();
 const ArtWorkSchema = require('../models/artworkSchema');
 const CollectionSchema = require('../models/collectionSchema');
@@ -8,17 +8,19 @@ const multer = require("multer");
 const storage = multer.memoryStorage();
 const upload = multer({storage});
 const googleDriveUtil = require('../utils/googleDriveUtil');
+const {removeCollection} = require('../utils/deleteUtils');
+const { ids } = require('googleapis/build/src/apis/ids');
 
 router.get('/portfolio', async(req, res) => {
     const collections = await CollectionSchema.find({}).populate('cover').sort({order:1});
-    res.render('./admin/edit-portfolio', {collections});
+    res.render('admin/edit-portfolio', {collections, admin:true});
 });
 
 router.route('/create-collection')
     .get(async(req, res) => {
-        res.render('admin/create-collection');
+        res.render('admin/create-collection', {input:null});
     })
-    .post(upload.array('image'), createUploadFolder, async (req, res) => {
+    .post(upload.array('image'), isCollectionExists, createUploadFolder, async (req, res) => {
         let artworks = [];
         for(let i = 0; i < req.files.length; i++) {
             const file = req.files[i];
@@ -47,22 +49,50 @@ router.route('/create-collection')
             description: description,
             updateDate: new Date()
         });
+        for (const artwork of artworks) {
+            artwork.collectionSchema = collection;
+            artwork.save();
+        }
     
         await collection.save();
-        res.redirect('/admin/create-collection');
+        res.redirect('./portfolio');
     })
+
+router.get('/:collection', async(req, res) => {
+    // res.send(`Collection: ${req.params.collection}`);
+    const collectionName = req.params.collection;
+    const collection = await CollectionSchema.findOne({collectionName: collectionName}).populate('artworks').populate('description').sort({order:1});
+    res.render('admin/edit-collection', {collection, admin:true})
+})
+
+router.delete('/all', async(req, res) => {
+    const collections = await CollectionSchema.find({}).populate('cover').populate('artworks').populate('description');
+    // remove all images
+    for(collection of collections) {
+        await removeCollection(collection.collectionName);
+    }
+    res.redirect('./portfolio')
+})
+
+
+router.delete('/artwork/:artworkId', async(req, res) => {
+    let id = req.params.artworkId;
+    const artwork = await ArtWorkSchema.findOne({_id: id});
+    googleDriveUtil.deleteImageWithIds([artwork.thumbnailId, artwork.imageId]);
+    ArtWorkSchema.remove({_id: id})
+    CollectionSchema.updateOne({_id:artwork.collectionSchema._id}, {
+        $pullAll: {
+            artworks: artwork._id
+        }
+    })
+})
+
 
 router.delete('/:collection', async(req, res) => {
     const {collection} = req.params;
-    const collectionAndArtworks = await CollectionSchema.findOne({collectionName: collection}).populate('artworks');
-    const ids = collectionAndArtworks.artworks.reduce( (acc, cur) => {
-        return acc.concat([cur.thumbnailId, cur.imageId]);
-    }, [])
-    console.log(ids);
-    googleDriveUtil.deleteImageWithIds(ids);
-    //await CollectionSchema.findOneAndDelete({collectionName: collection});
-    // add flash message
-    res.redirect('/admin/portfolio');
+    const resp = await removeCollection(collection);
+    req.flash(resp[0], resp[1]);
+    res.redirect('./portfolio');
 })
 
 module.exports = router;
