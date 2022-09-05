@@ -77,14 +77,24 @@ router.delete('/all', async(req, res) => {
 
 router.delete('/artwork/:artworkId', async(req, res) => {
     let id = req.params.artworkId;
-    const artwork = await ArtWorkSchema.findOne({_id: id});
+    const artwork = await ArtWorkSchema.findOne({_id: id}).populate('collectionSchema');
+    const collectionId = artwork.collectionSchema._id;
+    const artworkId = artwork._id;
     googleDriveUtil.deleteImageWithIds([artwork.thumbnailId, artwork.imageId]);
     ArtWorkSchema.remove({_id: id})
-    CollectionSchema.updateOne({_id:artwork.collectionSchema._id}, {
-        $pullAll: {
-            artworks: artwork._id
+    
+    CollectionSchema.findOneAndUpdate(
+        {_id: collectionId}, 
+        {$pull: {artworks: artworkId}},
+         function (err, docs) {
+        if(err) {
+            req.flash('error', `Unable to remove ${artwork.fileName}, Error: ${err}`);
+        } else {
+            req.flash('success', `Remove ${artwork.fileName} successfully`);
         }
+        res.redirect(`/admin/${artwork.collectionSchema.collectionName}`);
     })
+    
 })
 
 

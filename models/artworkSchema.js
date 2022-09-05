@@ -13,7 +13,7 @@ const ArtWorkSchema = new Schema({
     },
     collectionSchema: {
         type: Schema.Types.ObjectId,
-        ref: 'CollectionsSchema'
+        ref: 'CollectionSchema'
     },
     order:{
         type: Number
