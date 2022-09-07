@@ -22,10 +22,16 @@
   </head>
 
     <body onload="getYear()">
-        <%-include('../partials/navbar') %> 
+        
+        <% if(typeof admin === 'undefined') { %>
+            <%-include('../partials/navbar') %> 
+        <%} else {%>
+            <%-include('../partials/admin-navbar') %> 
+        <% } %>
         <div id="wrap">
             <div id="main">
                 <div class="container">
+                    <%-include('../partials/flash')%>
                     <%- body  %> 
                 </div>
             </div>

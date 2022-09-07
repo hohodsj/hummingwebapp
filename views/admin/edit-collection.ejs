@@ -1,0 +1,28 @@
+<% layout('layouts/boilerplate') %> 
+<p class="masterpieve-title"><%= collection.description.title %> </p>
+<% for(let line of collection.description.description.split('\n')) {%> 
+    <p class="masterpiece-content"><%= line %> </p>
+<% } %> 
+
+<div class="row">
+
+<% for(let artwork of collection.artworks) {%> 
+    <div class="col col-12 col-md-6 p-3">
+        <a data-fancybox="gallery" href="<%= artwork.imageUrl%>" title="Click To Enlarge">
+            <img src="<%= artwork.thumbnailUrl%>" class="img-thumbnail p-0">
+        </a>
+        <form action="/admin/artwork/<%= artwork._id%>?_method=DELETE" method="POST" style="margin-bottom: 25px">
+            <button type="btn" class="btn btn-danger" value="<%= artwork.fileName %>">Delete</button>
+        </form>
+    </div>
+<% } %> 
+</div>
+
+
+<div>
+    <a href="/admin/portfolio" class="outertext">
+    <i class="fas fa-angle-left nav-arrow" aria-hidden="true">
+        <span class="hovertext">Work</span>
+    </i>
+    </a>
+</div>

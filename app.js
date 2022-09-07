@@ -12,18 +12,11 @@ const DescriptionSchema = require('./models/descriptionSchema');
 const passport = require('passport');
 const LocalStrategy = require('passport-local');
 const UserSchema = require('./models/userSchema');
-const {isLoggedIn} = require('./middleware');
 const methodOverride = require('method-override');
+const bodyParser = require('body-parser');
 
-const multer = require("multer");
-const storage = multer.memoryStorage();
-const upload = multer({storage});
-const {createCollection} = require("./controllers/collectionsController");
-const sharp = require('sharp');
-const fs = require('fs');
-const uuid = require('uuid');
-const googleDriveUtil = require('./utils/googleDriveUtil');
 
+const adminRoutes = require('./routes/admin');
 
 const dbUrl = process.env.DB_URL || "mongodb://localhost:27017/hummingsang-portfolio";
 mongoose.connect(dbUrl);
@@ -39,6 +32,7 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
 app.use(express.urlencoded({extended:true}));
+app.use(bodyParser.text());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(methodOverride('_method'));
 
@@ -69,6 +63,8 @@ passport.deserializeUser(UserSchema.deserializeUser());
 
 app.use((req, res, next) => {
     res.locals.activeLocation = req.path;
+    res.locals.success = req.flash('success');
+    res.locals.error = req.flash('error');
     next();
 });
 
@@ -90,70 +86,13 @@ app.get('/login', (req, res) => {
     res.render('admin/login')
 });
 
-app.post('/login', passport.authenticate('local', {failureRedirect:'/login'}), (req, res) => {
+app.post('/login', passport.authenticate('local', {failureFlash: true, failureRedirect:'/login'}), (req, res) => {
     console.log('post login');
     console.log(req);
     res.redirect('/admin/portfolio');
 })
 
-app.get('/admin/portfolio', isLoggedIn, async(req, res) => {
-    const collections = await CollectionSchema.find({}).populate('cover').sort({order:1});
-    res.render('admin/edit-portfolio', {collections});
-})
-
-app.get('/admin/create-collection', async(req, res) => {
-    res.render('admin/create-collection');
-})
-
-app.post('/admin/create-collection', upload.array('image'), async (req, res) => {
-    console.log('file', req.file);
-    console.log('body', req.body);
-    fs.access('./uploads', (err) => {
-        if(err) {
-            fs.mkdir('./uploads');
-        }
-    })
-    //await sharp(req.file.buffer).resize({width: 100, height: 100}).toFile('./uploads/' + req.file.originalname);
-    let artworks = [];
-    for(let i = 0; i < req.files.length; i++) {
-        const file = req.files[i];
-        const [thumbnailId, imageId] = await googleDriveUtil.uploadImageToDrive(file.buffer, file.originalname.split('.').pop());
-        const artwork = new ArtWorkSchema({
-            thumbnailId: thumbnailId,
-            imageId: imageId,
-            fileName: file.originalname,
-            order: i,
-            createDate: new Date()
-        })
-        await artwork.save();
-        artworks.push(artwork);
-    }
-    const description = new DescriptionSchema({
-        title: req.body.collectionName,
-        description: req.body.description,
-        category: 'Collection'
-    });
-    description.save();
-    const collection = new CollectionSchema({
-        collectionName: req.body.collectionName,
-        cover: artworks[0],
-        order: 0,
-        artworks: artworks,
-        description: description,
-        updateDate: new Date()
-    });
-
-    await collection.save();
-    res.redirect('/admin/create-collection');
-});
-
-
-app.delete('/:collection', isLoggedIn, async(req, res) => {
-    const {collection} = req.params;
-    await CollectionSchema.findOneAndDelete({collectionName: collection});
-    // add flash message
-    res.redirect('/admin/portfolio');
-})
+app.use('/admin', adminRoutes);
 
 app.get('/:collection', catchAsync(async (req, res) => {
     const collectionName = req.params.collection;

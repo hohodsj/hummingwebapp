@@ -37,7 +37,8 @@ CollectionSchema.post('findOneAndDelete', async function(collection) {
                 $in:collection.artworks
             }
         })
-        await ArtWorkSchema.deleteOne({_id:collection.cover._id})
+        await ArtWorkSchema.deleteOne({_id:collection.cover._id}) //delete cover
+        await DescriptionSchema.deleteOne({_id:collection.description._id})
     }
 })
 

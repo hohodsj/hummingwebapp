@@ -58,3 +58,9 @@ module.exports.saveFile = async(fileName, filePath, fileMimeType, folderName) =>
         }
     });
 }
+
+module.exports.deleteFile = async(id) => {
+    return drive.files.delete({
+        fileId: id
+    });
+}
