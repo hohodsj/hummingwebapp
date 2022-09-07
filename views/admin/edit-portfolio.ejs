@@ -1,34 +1,58 @@
 <% layout('layouts/boilerplate') %> 
 <p>You must be login to see this TODO: Change this to flash later and add edit boiler plate</p>
-<div class="row">
+<div class="row" id="grid-card">
 <!-- Hover with text and link example -->
     <p>Showing art works</p>
     <% for(let collection of collections) { %>
-        <div class="col col-12 col-md-6 p-3">
+        <div class="col col-12 col-md-6 p-3" data-id="<%= collection.order%>">
             <a href="/admin/<%= collection.collectionName%> " title="Click To View Series">
-                <img src="<%= collection.cover.thumbnailUrl%>" class="img-thumbnail p-0">
-                <!-- <div class="overlay">
+                <img src="<%= collection.cover.thumbnailUrl%>" class="img-thumbnail p-0 img-responsive">
+                <div class="overlay">
                     <p class="overlay-text"><%=collection.collectionName%> <br> <i class="fa-solid fa-grip"></i></p> 
-                </div> -->
+                </div>
+                
             </a>
-            <form action="/admin/<%= collection.collectionName %>?_method=DELETE" method="POST" style="margin-bottom: 25px">
-                <label for="name">Name</label>
-                <input type="text" class="form-control" value="<%= collection.collectionName %> ">
+            <!-- <form action="/admin/<%= collection.collectionName %>?_method=DELETE" method="POST" style="margin-bottom: 25px">
                 <button type="btn" class="btn btn-danger" value="<%= collection.collectionName %>">Delete</button>
-            </form>
+            </form> -->
         </div>   
     <% } %> 
 </div>
 <form action="/admin/create-collection" class="position-fixed bottom-0 end-0 mb-5 mx-4" method="GET">
     <button class="btn btn-success">+</button>
 </form>
-<form action="/admin/all?_method=DELETE" method="POST" style="margin-bottom: 25px">
+<form action="/admin/all?_method=DELETE" method="POST" class="position-absolute bottom-0 start-50 translate-middle-x">
     <button type="btn" class="btn btn-danger">Delete All</button>
 </form>
-
+<form action="/admin/reorder/portfolio" method="POST" class="">
+    <input type="text" id="orders" name="orders" style="display:none">
+    <button type="btn" class="btn btn-success" style="display:none" id="save-button">Save</button>
+</form>
 <script>
     let buttons = document.querySelectorAll('.btn-danger');
     buttons.forEach(button => {
         button.onclick = (event) => confirm(`You are about to delete the collection ${button.value}, do you want to proceed?`);
     })
+</script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+<script>
+    new Sortable(document.getElementById('grid-card'), {
+            group: 'shared',
+            animation: 150,
+            multiDrag: true,
+            selectedClass: 'bg-info',
+            fallbackTolerance: 3,
+            group: 'storeOrder',
+            
+            store: {
+                set: function(order) {
+                    var sortable = order.toArray();
+                    console.log(`sortable: ${sortable}`)
+                    const orders = document.getElementById('orders');
+                    orders.value = sortable.slice(1)
+                    document.getElementById('save-button').style.display = "inline";
+                }
+            }
+            
+        })
 </script>

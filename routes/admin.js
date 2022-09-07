@@ -41,10 +41,11 @@ router.route('/create-collection')
             category: 'Collection'
         });
         description.save();
+        const collectionCount = await CollectionSchema.countDocuments({});
         const collection = new CollectionSchema({
             collectionName: req.body.collectionName,
             cover: artworks[0],
-            order: 0,
+            order: collectionCount,
             artworks: artworks,
             description: description,
             updateDate: new Date()
@@ -57,6 +58,24 @@ router.route('/create-collection')
         await collection.save();
         res.redirect('./portfolio');
     })
+
+router.post('/reorder/:type', async(req, res) => {
+    console.log(req.body.orders);
+    for(let i = 0; i < req.body.orders.length; i++) {
+        const oriOrder = req.body.orders[i];
+        if(i != oriOrder) {
+            CollectionSchema.findOneAndUpdate(
+                {order: oriOrder}, 
+                {$set: {order: i}},
+                 function (err, docs) {
+                if(err) {
+                    req.flash('error', `Unable to update order ${oriOrder} to ${i} , Error: ${err}`);
+                } 
+            })
+        }
+    }
+    res.redirect(`/admin/portfolio`);
+})
 
 router.get('/:collection', async(req, res) => {
     // res.send(`Collection: ${req.params.collection}`);
