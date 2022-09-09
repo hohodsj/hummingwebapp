@@ -501,6 +501,9 @@ input{
   font-size: 28px; 
 	margin: 30% 30%;
 }
+.work-link-edit{
+  font-size: 28px; 
+}
 
 .work-link-verti{
   font-size: 28px;
@@ -774,4 +777,14 @@ h3{
   margin-top: 25px;
 }
 
-
+/* delete button for images/collection */
+.delete_button{
+  position: relative;
+  top: 34px;
+  float: right;
+  z-index: 1;
+}
+.delete_button:hover{
+  opacity: 0.5;
+  
+}

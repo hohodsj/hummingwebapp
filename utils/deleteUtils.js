@@ -15,6 +15,9 @@ module.exports.removeCollection = async (collection) => {
         await CollectionSchema.findOneAndDelete({collectionName: collection});
         await DescriptionSchema.findOneAndDelete({_id: cad.description._id});
         await ArtworkSchema.deleteOne({_id: cad.cover._id});
+        for(let artwork of cad.artworks) {
+            await ArtworkSchema.findOneAndDelete({_id: artwork._id});
+        }
         // add flash message
         return ['success', `Collection: ${collection} deleted`]
         //req.flash('success', );

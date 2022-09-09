@@ -18,6 +18,9 @@ const ArtWorkSchema = new Schema({
     order:{
         type: Number
     },
+    isHorizontal: {
+        type: Boolean
+    },
     createDate: {
         type: Date
     }

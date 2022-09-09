@@ -10,7 +10,7 @@
             <div class="overlay">
                 <a href="/<%= collection.collectionName%> " class="work-link"  title="Click To View Series">
                     <div class="text">
-                        <p class="work-link"><%=collection.collectionName%><br/>
+                        <p class=<%= collection.cover.isHorizontal ? "work-link" : "work-link-verti" %>><%=collection.collectionName%><br/>
                             <i class="glyphicon glyphicon-th"></i>
                         </p>
                     </div>

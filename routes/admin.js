@@ -24,11 +24,12 @@ router.route('/create-collection')
         let artworks = [];
         for(let i = 0; i < req.files.length; i++) {
             const file = req.files[i];
-            const [thumbnailId, imageId] = await googleDriveUtil.uploadImageToDrive(file.buffer, file.originalname.split('.').pop());
+            const [thumbnailId, imageId, isHorizontal] = await googleDriveUtil.uploadImageToDrive(file.buffer, file.originalname.split('.').pop());
             const artwork = new ArtWorkSchema({
                 thumbnailId: thumbnailId,
                 imageId: imageId,
                 fileName: file.originalname,
+                isHorizontal: isHorizontal,
                 order: i,
                 createDate: new Date()
             })
@@ -59,11 +60,13 @@ router.route('/create-collection')
         res.redirect('./portfolio');
     })
 
-router.post('/reorder/:type', async(req, res) => {
-    console.log(req.body.orders);
-    for(let i = 0; i < req.body.orders.length; i++) {
-        const oriOrder = req.body.orders[i];
+router.post('/reorder/portfolio', async(req, res) => {
+    const ordersArr = req.body.orders.split(',');
+    console.log(ordersArr);
+    for(let i = 0; i < ordersArr.length; i++) {
+        const oriOrder = ordersArr[i];
         if(i != oriOrder) {
+            console.log(`update origin order ${oriOrder} to ${i}`);
             CollectionSchema.findOneAndUpdate(
                 {order: oriOrder}, 
                 {$set: {order: i}},
@@ -77,10 +80,31 @@ router.post('/reorder/:type', async(req, res) => {
     res.redirect(`/admin/portfolio`);
 })
 
+router.post('/reorder/artwork/:collectionId/:collectionName', async(req, res) => {
+    const ordersArr = req.body.orders.split(',');
+    console.log(ordersArr);
+    for(let i = 0; i < ordersArr.length; i++) {
+        const oriOrder = ordersArr[i];
+        //if(i != oriOrder) {
+            console.log(`update origin order ${oriOrder} to ${i}`);
+            ArtWorkSchema.findOneAndUpdate(
+                {collectionSchema: req.params.collectionId, order: oriOrder}, 
+                {$set: {order: i}},
+                 function (err, docs) {
+                if(err) {
+                    req.flash('error', `Unable to update order ${oriOrder} to ${i} , Error: ${err}`);
+                } 
+            })
+        //}
+    }
+    res.redirect(`/admin/${req.params.collectionName}`);
+})
+
 router.get('/:collection', async(req, res) => {
     // res.send(`Collection: ${req.params.collection}`);
     const collectionName = req.params.collection;
-    const collection = await CollectionSchema.findOne({collectionName: collectionName}).populate('artworks').populate('description').sort({order:1});
+    const options = {sort: [{'order': 'asc'}]};
+    const collection = await CollectionSchema.findOne({collectionName: collectionName}).populate({path: 'artworks', options}).populate('description');
     res.render('admin/edit-collection', {collection, admin:true})
 })
 

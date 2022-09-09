@@ -25,7 +25,7 @@
         <div id="wrap">
             <div id="main">
                 <div id="header">
-                    <h1><a href="./">Humming Sang</a></h1>
+                    <h1><a href="/">Humming Sang</a></h1>
                 </div>
                 <br/>
                 <% if(typeof admin === 'undefined') { %>
@@ -46,6 +46,30 @@
             crossorigin="anonymous"></script> -->
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
         <script src="/javascripts/validateForms.js"></script>
+        
+        <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+        <script>
+            Sortable.create(document.getElementById('grid-card'), {
+                    group: 'shared',
+                    animation: 150,
+                    multiDrag: true,
+                    selectedClass: 'bg-info',
+                    fallbackTolerance: 3,
+                    group: 'storeOrder',
+                    
+                    store: {
+                        set: function(order) {
+                            var sortable = order.toArray();
+                            console.log(`sortable: ${sortable}`)
+                            const orders = document.getElementById('orders');
+                            var regExp = /[a-zA-Z]/g;
+                            orders.value = regExp.test(sortable[0]) ? sortable.slice(1) : sortable;
+                            document.getElementById('save-button').style.display = "inline";
+                        }
+                    }
+                    
+                })
+        </script>
     </body>
     <%-include('../partials/footer') %> 
 </html>
