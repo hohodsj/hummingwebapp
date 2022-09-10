@@ -9,6 +9,7 @@ const storage = multer.memoryStorage();
 const upload = multer({storage});
 const googleDriveUtil = require('../utils/googleDriveUtil');
 const {removeCollection} = require('../utils/deleteUtils');
+const catchAsync = require('../utils/catchAsync');
 const { ids } = require('googleapis/build/src/apis/ids');
 
 router.get('/portfolio', async(req, res) => {
@@ -20,10 +21,28 @@ router.route('/create-collection')
     .get(async(req, res) => {
         res.render('admin/create-collection', {input:null});
     })
-    .post(upload.array('image'), isCollectionExists, createUploadFolder, async (req, res) => {
+    .post(upload.fields([{name:'cover'}, {name: 'image'}]), isCollectionExists, createUploadFolder, catchAsync( async (req, res) => {
         let artworks = [];
-        for(let i = 0; i < req.files.length; i++) {
-            const file = req.files[i];
+        if(!req.files.cover || !req.files.image) {
+            req.flash('error', `Cover and images cannot be empty`);
+            res.redirect('create-collection')
+            //res.render('admin/create-collection', {input:{collectionName:req.body.collectionName, description:req.body.description}});
+            return
+        }
+        const file = req.files.cover[0];
+        const [thumbnailId, imageId, isHorizontal] = await googleDriveUtil.uploadImageToDrive(file.buffer, file.originalname.split('.').pop());
+        const cover = new ArtWorkSchema({
+            thumbnailId: thumbnailId,
+            imageId: imageId,
+            fileName: file.originalname,
+            isHorizontal: isHorizontal,
+            order: -1,
+            createDate: new Date()
+        })
+        await cover.save();
+
+        for(let i = 0; i < req.files.image.length; i++) {
+            const file = req.files.image[i];
             const [thumbnailId, imageId, isHorizontal] = await googleDriveUtil.uploadImageToDrive(file.buffer, file.originalname.split('.').pop());
             const artwork = new ArtWorkSchema({
                 thumbnailId: thumbnailId,
@@ -45,7 +64,7 @@ router.route('/create-collection')
         const collectionCount = await CollectionSchema.countDocuments({});
         const collection = new CollectionSchema({
             collectionName: req.body.collectionName,
-            cover: artworks[0],
+            cover: cover,
             order: collectionCount,
             artworks: artworks,
             description: description,
@@ -58,7 +77,7 @@ router.route('/create-collection')
     
         await collection.save();
         res.redirect('./portfolio');
-    })
+    }))
 
 router.post('/reorder/portfolio', async(req, res) => {
     const ordersArr = req.body.orders.split(',');

@@ -4,11 +4,12 @@ const DescriptionSchema = require('../models/descriptionSchema');
 const googleDriveUtil = require('../utils/googleDriveUtil');
 
 module.exports.removeCollection = async (collection) => {
-    const cad = await CollectionSchema.findOne({collectionName: collection}).populate('artworks').populate('description');
+    const cad = await CollectionSchema.findOne({collectionName: collection}).populate('cover').populate('artworks').populate('description');
     const ids = cad.artworks.reduce( (acc, cur) => {
         ArtworkSchema.remove({_id: cur._id});
         return acc.concat([cur.thumbnailId, cur.imageId]);
-    }, [])
+    }, [cad.cover.thumbnailId, cad.cover.imageId])
+    ArtworkSchema.remove({_id: cad.cover._id});
     console.log(ids);
     try{
         await googleDriveUtil.deleteImageWithIds(ids);
