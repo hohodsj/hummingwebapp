@@ -4,21 +4,26 @@
 <!-- Hover with text and link example -->
     <p>Showing art works</p>
     <% for(let collection of collections) { %>
-        <div class="col col-12 col-md-6 p-3" data-id="<%= collection.order%>">
-            <a href="/admin/<%= collection.collectionName%> " title="Click To View Series">
-                <img src="<%= collection.cover.thumbnailUrl%>" class="img-thumbnail p-0 img-responsive">
-                <div class="overlay">
-                    <p class="overlay-text"><%=collection.collectionName%> <br> <i class="fa-solid fa-grip"></i></p> 
-                </div>
-                
-            </a>
-            <!-- <form action="/admin/<%= collection.collectionName %>?_method=DELETE" method="POST" style="margin-bottom: 25px">
-                <button type="btn" class="btn btn-danger" value="<%= collection.collectionName %>">Delete</button>
-            </form> -->
-        </div>   
+        <div class="col-md-6" data-id="<%= collection.order%>">
+            <form action="/admin/<%= collection.collectionName %>?_method=DELETE" method="POST" class="delete_button">
+                <button type="btn" class="btn btn-danger" value="<%= collection.collectionName %>"><i class="fa fa-times"></i></button>
+            </form>
+            <div class="thumbnail"> 
+                <img src="<%= collection.cover.thumbnailUrl%>">
+                <!-- <div class="overlay"> -->
+                    <a href="/admin/<%= collection.collectionName%> " class="work-link-edit"  title="Click To View Series">
+                        <div class="text">
+                            <p class=<%= collection.cover.isHorizontal ? "work-link" : "work-link-verti" %>><%=collection.collectionName%><br/>
+                                <i class="glyphicon glyphicon-th"></i>
+                            </p>
+                        </div>
+                    </a>
+                <!-- </div> -->
+            </div>
+        </div>
     <% } %> 
 </div>
-<form action="/admin/create-collection" class="position-fixed bottom-0 end-0 mb-5 mx-4" method="GET">
+<form action="/admin/create-collection" class="fixed-bottom" method="GET">
     <button class="btn btn-success">+</button>
 </form>
 <form action="/admin/all?_method=DELETE" method="POST" class="position-absolute bottom-0 start-50 translate-middle-x">
@@ -33,26 +38,4 @@
     buttons.forEach(button => {
         button.onclick = (event) => confirm(`You are about to delete the collection ${button.value}, do you want to proceed?`);
     })
-</script>
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
-<script>
-    new Sortable(document.getElementById('grid-card'), {
-            group: 'shared',
-            animation: 150,
-            multiDrag: true,
-            selectedClass: 'bg-info',
-            fallbackTolerance: 3,
-            group: 'storeOrder',
-            
-            store: {
-                set: function(order) {
-                    var sortable = order.toArray();
-                    console.log(`sortable: ${sortable}`)
-                    const orders = document.getElementById('orders');
-                    orders.value = sortable.slice(1)
-                    document.getElementById('save-button').style.display = "inline";
-                }
-            }
-            
-        })
 </script>

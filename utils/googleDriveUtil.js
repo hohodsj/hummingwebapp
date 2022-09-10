@@ -26,7 +26,7 @@ module.exports.uploadImageToDrive = async (fileBuffer, type, folderName='ArtWork
     const uploadThumbnailId = await uploadImageHelper(fileBuffer, folderName, thumbnailWidth, thumbnailHeight, type);
     const imageWidth = width > height ? 1500 : 1125, imageHeight = width > height ? 999 : 1500;
     const uploadImageId = await uploadImageHelper(fileBuffer, folderName, imageWidth, imageHeight, type);
-    return [uploadThumbnailId, uploadImageId];
+    return [uploadThumbnailId, uploadImageId, width > height];
 }
 
 uploadImageHelper = async(fileBuffer, folderName, width, height, type) => {

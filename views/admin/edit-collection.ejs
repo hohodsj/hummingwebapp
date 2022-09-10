@@ -4,23 +4,26 @@
     <p class="masterpiece-content"><%= line %> </p>
 <% } %> 
 
-<div class="row">
-
-<% for(let artwork of collection.artworks) {%> 
-    <div class="col col-12 col-md-6 p-3">
-        <a data-fancybox="gallery" href="<%= artwork.imageUrl%>" title="Click To Enlarge">
-            <img src="<%= artwork.thumbnailUrl%>" class="img-thumbnail p-0">
-        </a>
-        <form action="/admin/artwork/<%= artwork._id%>?_method=DELETE" method="POST" style="margin-bottom: 25px">
-            <button type="btn" class="btn btn-danger" value="<%= artwork.fileName %>">Delete</button>
-        </form>
-    </div>
-<% } %> 
+<div class="row" id="grid-card">
+    <% for(let artwork of collection.artworks) {%> 
+        <div class="col-md-6" data-id="<%=artwork.order%>">
+            <form action="/admin/artwork/<%= artwork._id%>?_method=DELETE" method="POST" class="delete_button">
+                <button type="btn" class="btn btn-danger" value="<%= artwork.fileName %>"><i class="fa fa-times"></i></button>
+            </form>
+            <div class="thumbnail">
+                <img src="<%= artwork.thumbnailUrl%>">
+            </div>
+        </div>
+    <% } %>
 </div>
 
+<form action="/admin/reorder/artwork/<%=collection._id%>/<%=collection.collectionName%>" method="POST" class="">
+    <input type="text" id="orders" name="orders" style="display:none">
+    <button type="btn" class="btn btn-success" style="display:none" id="save-button">Save</button>
+</form>
 
 <div>
-    <a href="/admin/portfolio" class="outertext">
+    <a href="./portfolio" class="outertext">
     <i class="fas fa-angle-left nav-arrow" aria-hidden="true">
         <span class="hovertext">Work</span>
     </i>
