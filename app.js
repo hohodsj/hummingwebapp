@@ -96,7 +96,8 @@ app.use('/admin', adminRoutes);
 
 app.get('/:collection', catchAsync(async (req, res) => {
     const collectionName = req.params.collection;
-    const collection = await CollectionSchema.findOne({collectionName: collectionName}).populate('artworks').populate('description').sort({order:1});
+    const options = {sort: [{'order': 'asc'}]};
+    const collection = await CollectionSchema.findOne({collectionName: collectionName}).populate({path: 'artworks', options}).populate('description');
     // const artworks = collection.artworks;
 
     res.render('collection', {collection});
