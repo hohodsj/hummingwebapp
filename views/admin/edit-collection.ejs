@@ -1,8 +1,20 @@
 <% layout('layouts/boilerplate') %> 
-<p class="masterpieve-title"><%= collection.description.title %> </p>
-<% for(let line of collection.description.description.split('\n')) {%> 
-    <p class="masterpiece-content"><%= line %> </p>
-<% } %> 
+<form action="/admin/update/collection/<%=collection._id%>/<%=collection.collectionName%>" id="description-form" method="POST" enctype="multipart/form-data">
+    <label for="title">Title</label>
+    <input type="text" class="form-control" name="title" value="<%= collection.description.title %>">
+    <label for="description">Description</label>
+    <textarea class="form-control" name="description" rows="3"><%=collection.description.description%></textarea>
+    <input type="text" id="orders" name="orders" style="display:none">
+    <div class="input-group mb-3">
+        <label for="cover-image">Cover</label>
+        <input type="file" class="form-control" name="cover">
+    </div>
+    <div class="input-group mb-3">
+        <label for="image">Images</label>
+        <input type="file" class="form-control" name="image" id="image" multiple>
+    </div>
+    <button type="btn" class="btn btn-success">Save</button>
+</form>
 
 <div class="row" id="grid-card">
     <% for(let artwork of collection.artworks) {%> 
@@ -17,10 +29,14 @@
     <% } %>
 </div>
 
-<form action="/admin/reorder/artwork/<%=collection._id%>/<%=collection.collectionName%>" method="POST" class="">
-    <input type="text" id="orders" name="orders" style="display:none">
-    <button type="btn" class="btn btn-success" style="display:none" id="save-button">Save</button>
-</form>
+<!-- <form action="/admin/add/artworks-to-collection/<%=collection._id%>/<%=collection.collectionName%>" method="POST" class="validated-form" enctype="multipart/form-data">
+    <div class="input-group mb-3">
+        <label for="image">Images</label>
+        <input type="file" class="form-control" name="image" id="image" multiple>
+    </div>
+    <button type="btn" class="btn btn-success">Submit Image</button>
+</form> -->
+
 
 <div>
     <a href="./portfolio" class="outertext">
