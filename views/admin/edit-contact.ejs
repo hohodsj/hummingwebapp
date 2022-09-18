@@ -1,0 +1,55 @@
+<% layout('layouts/boilerplate') %> 
+<a href="https://fontawesome.com/search?o=r&m=free" class="title-tag" target="_blank">Get Icons Here</a>
+</br></br></br>
+
+<form action="" method="POST" class="update-form row" id="social-form">
+    <% for(let icon of iconDescriptions) { %> 
+    <div class="icon-description col-md-2">
+        <button type="btn" class="btn btn-danger delete-social"><i class="fa fa-times"></i></button>
+        <div class="contact-icon-span">
+            <a href="<%= icon.description %> " style="text-decoration:none" target="_blank">
+            <i class="<%= icon.title %> fa-fw contact-icons-sizes" id="instagram"></i>
+            </a>
+        </div>
+        <label for="title">Icon</label>
+        <input type="text" class="form-control input-sm" name="title" value="<%= icon.title %>">
+        <label for="Link">Link</label>
+        <input type="text" class="form-control input-sm" name="description" value="<%= icon.description %>">
+    </div>
+    <% } %> 
+    <button type="btn" class="btn btn-success" id="save-social-button">Save</button>
+</form>
+<button type="btn" class="btn btn-success sticky-top" id="plus-button">+</button>
+
+<script>
+    const deleteButtons = document.getElementsByClassName("delete-social");
+    function updateDeleteListener(){
+        for(let i = 0; i < deleteButtons.length; i++) {
+            const button = deleteButtons[i];
+            button.addEventListener('click', function(e) {
+                button.parentElement.remove();
+            })
+        }
+    }
+    updateDeleteListener();
+    const addButton = document.getElementById("plus-button");
+    const saveButton = document.getElementById("save-social-button");
+    const form = document.getElementById("social-form");
+    addButton.addEventListener('click', function(e) {
+        const div = document.createElement("div");
+        div.classList.add("icon-description");
+        div.classList.add("col-md-2");
+        div.innerHTML = `<button type="btn" class="btn btn-danger delete-social"><i class="fa fa-times"></i></button>
+        <div class="contact-icon-span">
+            <a href="." style="text-decoration:none" target="_blank">
+            <i class="fa-regular fa-image fa-fw contact-icons-sizes""></i>
+            </a>
+        </div>
+        <label for="title">Icon</label>
+        <input type="text" class="form-control input-sm" name="title">
+        <label for="Link">Link</label>
+        <input type="text" class="form-control input-sm" name="description">`
+        form.insertBefore(div, saveButton);
+        updateDeleteListener();
+    })
+</script>

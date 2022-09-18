@@ -1,0 +1,38 @@
+<% layout('layouts/boilerplate') %> 
+
+<form action="/admin/about" method="POST" class="update-form" id="description-form">
+<% for(let i = 0; i < descriptions.length; i++) {%>
+    <% const description = descriptions[i] %>
+    <div class="form-group">
+        <button type="btn" class="btn btn-danger delete-button delete-description"><i class="fa fa-times"></i></button>
+        <input class="form-control" type="text" name="title" value="<%=description.title%>">
+        <textarea class="form-control" name="description" cols="30" rows="10"><%=description.description%></textarea>
+    </div>
+<% } %>
+<button type="btn" class="btn btn-success" id="save-descriptions-button">Save</button>
+</form>
+<button type="btn" class="btn btn-success sticky-top" id="plus-button">+</button>
+<script>
+    const deleteButtons = document.getElementsByClassName("delete-description");
+    function updateDeleteListener(){
+        for(let i = 0; i < deleteButtons.length; i++) {
+            const button = deleteButtons[i];
+            button.addEventListener('click', function(e) {
+                button.parentElement.remove();
+            })
+        }
+    }
+    updateDeleteListener();
+    const addButton = document.getElementById("plus-button");
+    const saveButton = document.getElementById("save-descriptions-button");
+    const form = document.getElementById("description-form")
+    // const input = document.querySelectorAll("form-group:nth-last-of-type(1)")[0];
+    addButton.addEventListener('click', function(e) {
+        const div = document.createElement("div");
+        div.classList.add("form-group");
+        // const input = document.createElement("INPUT");
+        div.innerHTML = `<button type=\"btn\" class=\"btn btn-danger delete-button delete-description\"><i class=\"fa fa-times\"></i></button><input class=\"form-control\" type=\"text\" name=\"title\"><textarea class=\"form-control\" name=\"description\" cols=\"30\" rows=\"10\"></textarea>`
+        form.insertBefore(div, saveButton);
+        updateDeleteListener();
+    })
+</script>
