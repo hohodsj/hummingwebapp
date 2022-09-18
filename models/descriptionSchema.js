@@ -10,8 +10,12 @@ const DescriptionSchema = new Schema({
     },
     category: {
         type: String,
-        enum: ['CV', 'Collection'],
+        enum: ['CV', 'Collection', 'Social'],
         required: true
+    },
+    order: {
+        type: Number,
+        default: 0
     }
 });
 

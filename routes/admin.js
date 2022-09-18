@@ -10,8 +10,8 @@ const upload = multer({storage});
 const googleDriveUtil = require('../utils/googleDriveUtil');
 const {removeCollection} = require('../utils/deleteUtils');
 const catchAsync = require('../utils/catchAsync');
-const descriptionSchema = require('../models/descriptionSchema');
-const collectionSchema = require('../models/collectionSchema');
+const {createArtwork, createDescription, createCollection} = require('../factory/factory');
+const {zip} = require('../utils/zip')
 
 router.get('/portfolio', async(req, res) => {
     const collections = await CollectionSchema.find({}).populate('cover').sort({order:1});
@@ -26,58 +26,35 @@ router.route('/create-collection')
         let artworks = [];
         if(!req.files.cover || !req.files.image) {
             req.flash('error', `Cover and images cannot be empty`);
-            res.redirect('create-collection')
+            // res.redirect('create-collection')
             //res.render('admin/create-collection', {input:{collectionName:req.body.collectionName, description:req.body.description}});
             return
         }
+        const collectionName = req.body.collectionName;
         const file = req.files.cover[0];
         const [thumbnailId, imageId, isHorizontal] = await googleDriveUtil.uploadImageToDrive(file.buffer, file.originalname.split('.').pop());
-        const cover = new ArtWorkSchema({
-            thumbnailId: thumbnailId,
-            imageId: imageId,
-            fileName: file.originalname,
-            isHorizontal: isHorizontal,
-            order: -1,
-            createDate: new Date()
-        })
+        const cover = createArtwork(thumbnailId, imageId, file.originalname, isHorizontal, -1);
         await cover.save();
 
         for(let i = 0; i < req.files.image.length; i++) {
             const file = req.files.image[i];
             const [thumbnailId, imageId, isHorizontal] = await googleDriveUtil.uploadImageToDrive(file.buffer, file.originalname.split('.').pop());
-            const artwork = new ArtWorkSchema({
-                thumbnailId: thumbnailId,
-                imageId: imageId,
-                fileName: file.originalname,
-                isHorizontal: isHorizontal,
-                order: i,
-                createDate: new Date()
-            })
+            const artwork = createArtwork(thumbnailId, imageId, file.originalname, isHorizontal, i);
             await artwork.save();
             artworks.push(artwork);
         }
-        const description = new DescriptionSchema({
-            title: req.body.collectionName,
-            description: req.body.description,
-            category: 'Collection'
-        });
+        const description = createDescription(collectionName, req.body.description, 'Collection');
         description.save();
         const collectionCount = await CollectionSchema.countDocuments({});
-        const collection = new CollectionSchema({
-            collectionName: req.body.collectionName,
-            cover: cover,
-            order: collectionCount,
-            artworks: artworks,
-            description: description,
-            updateDate: new Date()
-        });
+        const collection = createCollection(collectionName, cover, collectionCount, artworks, description);
         artworks.push(cover);
-        for (const artwork of artworks) {
+
+        artworks.forEach(artwork => {
             artwork.collectionSchema = collection;
             artwork.save();
-        }
-    
+        })
         await collection.save();
+        req.flash('success', 'Successfully upload');
         res.redirect('./portfolio');
     }))
 
@@ -87,7 +64,6 @@ router.post('/reorder/portfolio', async(req, res) => {
     for(let i = 0; i < ordersArr.length; i++) {
         const oriOrder = ordersArr[i];
         if(i != oriOrder) {
-            console.log(`update origin order ${oriOrder} to ${i}`);
             CollectionSchema.findOneAndUpdate(
                 {order: oriOrder}, 
                 {$set: {order: i}},
@@ -108,7 +84,7 @@ router.post('/update/collection/:collectionId/:collectionName', upload.fields([{
     const descriptionId = collection.description._id;
     const collectionId = req.params.collectionId;
     const collectionName = req.params.collectionName;
-    descriptionSchema.findOneAndUpdate(
+    DescriptionSchema.findOneAndUpdate(
         {_id: descriptionId},
         {$set: {title: title, description:description}},
         function (err, docs) {
@@ -140,19 +116,10 @@ router.post('/update/collection/:collectionId/:collectionName', upload.fields([{
     if(req.files.cover) {
         const file = req.files.cover[0];
         const [thumbnailId, imageId, isHorizontal] = await googleDriveUtil.uploadImageToDrive(file.buffer, file.originalname.split('.').pop());
-        const cover = new ArtWorkSchema({
-            thumbnailId: thumbnailId,
-            imageId: imageId,
-            fileName: file.originalname,
-            isHorizontal: isHorizontal,
-            order: -1,
-            createDate: new Date(),
-            collectionSchema: collection
-        })
+        const cover = createArtwork(thumbnailId, imageId, file.originalname, isHorizontal, -1, collection);
         await cover.save();
-        const oldCover = collection.cover;
-        await googleDriveUtil.deleteImageWithIds([oldCover.thumbnailId, oldCover.imageId]);
-        ArtWorkSchema.remove({_id: oldCover._id});
+        await googleDriveUtil.deleteImageWithIds([collection.cover.thumbnailId, collection.cover.imageId]);
+        ArtWorkSchema.remove({_id: collection.cover._id});
         collection.cover = cover;
         await collection.save();
     }
@@ -163,15 +130,8 @@ router.post('/update/collection/:collectionId/:collectionName', upload.fields([{
             const [thumbnailId, imageId, isHorizontal] = await googleDriveUtil.uploadImageToDrive(file.buffer, file.originalname.split('.').pop());
             // const collectionCount = await CollectionSchema.countDocuments({});
             const artworksCount = await ArtWorkSchema.countDocuments({collectionSchema: collectionId});
-            const artwork = new ArtWorkSchema({
-                thumbnailId: thumbnailId,
-                imageId: imageId,
-                fileName: file.originalname,
-                order: artworksCount,
-                isHorizontal: isHorizontal,
-                createDate: new Date(),
-                collectionSchema: collection,
-            })
+            const actualOrder = artworksCount - 1;
+            const artwork = createArtwork(thumbnailId, imageId, file.originalname, isHorizontal, actualOrder, collection);
             await artwork.save();
             CollectionSchema.updateOne(
                 {_id: collectionId},
@@ -189,6 +149,47 @@ router.post('/update/collection/:collectionId/:collectionName', upload.fields([{
     res.redirect(`/admin/${req.params.collectionName}`);
 })
 
+router.route('/about')
+    .get(async(req,res) => {
+        const descriptions = await DescriptionSchema.find({category: 'CV'}).sort({order: 1});
+        res.render('admin/edit-about', {descriptions, admin:true});
+    })
+    .post(async(req, res) => {
+        const titleDescriptionPair = zip([req.body.title, req.body.description]);
+        await DescriptionSchema.remove({category: 'CV'});
+        for(let i = 0; i < titleDescriptionPair.length; i++) {
+            const titleDescription = titleDescriptionPair[i];
+            if(titleDescription[0] && titleDescription[1]) {
+                console.log(titleDescription);
+                const description = createDescription(titleDescription[0], titleDescription[1], 'CV', i);
+                await description.save();
+            } 
+        }
+        res.redirect('/admin/about');
+    })
+
+router.route('/contact')
+    .get(async(req, res) => {
+        const iconDescriptions = await DescriptionSchema.find({category: 'Social'}).sort({order:1});
+        res.render('admin/edit-contact', {iconDescriptions, admin:true})
+    })
+    .post(async(req, res) => {
+        const titleDescriptionPair = zip([req.body.title, req.body.description]);
+        await DescriptionSchema.remove({category: 'Social'});
+        for(let i = 0; i < titleDescriptionPair.length; i++) {
+            const titleDescription = titleDescriptionPair[i];
+            if(titleDescription[0] && titleDescription[1]) {
+                let title = titleDescription[0];
+                if(title.includes("<i class=")) {
+                    title = title.split("\"")[1];
+                }
+                const description = createDescription(title, titleDescription[1], 'Social', i);
+                await description.save();
+            } 
+        }
+        res.redirect('/admin/contact');
+    })
+
 router.get('/:collection', async(req, res) => {
     // res.send(`Collection: ${req.params.collection}`);
     const collectionName = req.params.collection;
@@ -198,11 +199,8 @@ router.get('/:collection', async(req, res) => {
 })
 
 router.delete('/all', async(req, res) => {
-    const collections = await CollectionSchema.find({}).populate('cover').populate('artworks').populate('description');
-    // remove all images
-    for(collection of collections) {
-        await removeCollection(collection.collectionName);
-    }
+    const collections = await CollectionSchema.find({});
+    collections.forEach(collection => (removeCollection(collection.collectionName)));
     res.redirect('./portfolio')
 })
 
@@ -212,8 +210,23 @@ router.delete('/artwork/:artworkId', async(req, res) => {
     const artwork = await ArtWorkSchema.findOne({_id: id}).populate('collectionSchema');
     const collectionId = artwork.collectionSchema._id;
     const artworkId = artwork._id;
-    googleDriveUtil.deleteImageWithIds([artwork.thumbnailId, artwork.imageId]);
-    ArtWorkSchema.remove({_id: id})
+    const order = artwork.order;
+    await googleDriveUtil.deleteImageWithIds([artwork.thumbnailId, artwork.imageId]);
+    await ArtWorkSchema.remove({_id: id})
+    const artworks = await CollectionSchema.findOne({_id: collectionId}).populate('artworks');
+    // const count = await CollectionSchema.findOne({_id: collectionId}).populate('artworks').countDocuments({});
+    const count = await ArtWorkSchema.countDocuments({collectionSchema: collectionId}); // count cover, remove 1 img same length as expected
+    for(let i = order + 1; i < count; i++) {
+        const updatedOrder = i - 1;
+        ArtWorkSchema.findOneAndUpdate(
+            {collectionSchema: collectionId, order: i},
+            {$set: {order: updatedOrder}}, // <------------------ syntax here
+            function(err, docs) {
+                if(err) console.log(err)
+                else console.log(docs)
+            }
+        )
+    }
     
     CollectionSchema.findOneAndUpdate(
         {_id: collectionId}, 
@@ -225,10 +238,8 @@ router.delete('/artwork/:artworkId', async(req, res) => {
             req.flash('success', `Remove ${artwork.fileName} successfully`);
         }
         res.redirect(`/admin/${artwork.collectionSchema.collectionName}`);
-    })
-    
+    })  
 })
-
 
 router.delete('/:collection', async(req, res) => {
     const {collection} = req.params;

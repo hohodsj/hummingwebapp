@@ -13,9 +13,9 @@
 
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
         <ul class="nav navbar-nav">
-            <li><a href="/admin/about" class="navbar-tag <%= activeLocation == '/about' ? 'current-page' : '' %>">CV</a></li>
-            <li><a href="/admin/portfolio" class="navbar-tag <%= (activeLocation != '/about' && activeLocation != '/contact') ? 'current-page' : '' %>">Work</a></li>
-            <li><a href="/admin/contact" class="navbar-tag <%= activeLocation == '/contact' ? 'current-page' : ''%>">Contact</a></li>
+            <li><a href="/admin/about" class="navbar-tag <%= activeLocation == '/admin/about' ? 'current-page' : '' %>">CV</a></li>
+            <li><a href="/admin/portfolio" class="navbar-tag <%= (activeLocation != '/admin/about' && activeLocation != '/admin/contact') ? 'current-page' : '' %>">Work</a></li>
+            <li><a href="/admin/contact" class="navbar-tag <%= activeLocation == '/admin/contact' ? 'current-page' : ''%>">Contact</a></li>
         </ul>
         </div><!-- /.navbar-collapse -->
     </div><!-- /.container-fluid -->

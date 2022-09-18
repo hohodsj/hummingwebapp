@@ -74,12 +74,14 @@ app.get('/', catchAsync(async (req, res) => {
     res.render('portfolio', {collections});
 }));
 
-app.get('/about', (req, res) => {
-    res.render('about');
+app.get('/about', async (req, res) => {
+    const descriptions = await DescriptionSchema.find({category: 'CV'}).sort({order: 1});
+    res.render('about', {descriptions});
 });
 
-app.get('/contact', (req, res) => {
-    res.render('contact');
+app.get('/contact', async (req, res) => {
+    const descriptions = await DescriptionSchema.find({category: 'Social'}).sort({order: 1});
+    res.render('contact', {descriptions});
 });
 
 app.get('/login', (req, res) => {

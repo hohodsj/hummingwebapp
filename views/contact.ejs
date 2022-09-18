@@ -1,6 +1,15 @@
-<% layout('layouts/boilerplate') %> 
-<div class="contact-icons">  
-<span class="contact-icon-span">
+<% layout('layouts/boilerplate') %>
+<div class="contact-icons">
+    <% for(let description of descriptions) {%>
+        <span class="contact-icon-span">
+            <a href="<%=description.description%>" style="text-decoration:none" target="_blank">
+            <i class="<%=description.title  %>  fa-fw contact-icons-sizes" id="instagram"></i>
+            </a>
+        </span>
+        <span id="mobile-space"></span>
+    <% } %> 
+</div>
+<!-- <span class="contact-icon-span">
     <a href="http://www.instagram.com/hummingsang/" style="text-decoration:none" target="_blank">
     <i class="fab fa-instagram fa-fw contact-icons-sizes" id="instagram"></i>
     </a>
@@ -10,5 +19,4 @@
     <a href="mailto: sanghumming@gmail.com">
     <i class="far fa-envelope fa-fw contact-icons-sizes" id="email"></i>
     </a>
-</span> 
-</div>
+</span>  -->
