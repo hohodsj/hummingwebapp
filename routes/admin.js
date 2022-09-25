@@ -10,15 +10,17 @@ const upload = multer({storage});
 const googleDriveUtil = require('../utils/googleDriveUtil');
 const {removeCollection} = require('../utils/deleteUtils');
 const catchAsync = require('../utils/catchAsync');
+const {zip} = require('../utils/zip');
+const {uploadCleanup} = require('../utils/uploadCleanup');
 const {createArtwork, createDescription, createCollection} = require('../factory/factory');
-const {zip} = require('../utils/zip')
+const passport = require('passport');
 
-router.get('/portfolio', async(req, res) => {
+router.get('/portfolio', isLoggedIn, async(req, res) => {
     const collections = await CollectionSchema.find({}).populate('cover').sort({order:1});
     res.render('admin/edit-portfolio', {collections, admin:true});
 });
 
-router.route('/create-collection')
+router.route('/create-collection', isLoggedIn)
     .get(async(req, res) => {
         res.render('admin/create-collection', {input:null});
     })
@@ -54,11 +56,12 @@ router.route('/create-collection')
             artwork.save();
         })
         await collection.save();
+        uploadCleanup();
         req.flash('success', 'Successfully upload');
         res.redirect('./portfolio');
     }))
 
-router.post('/reorder/portfolio', async(req, res) => {
+router.post('/reorder/portfolio', isLoggedIn, async(req, res) => {
     const ordersArr = req.body.orders.split(',');
     console.log(ordersArr);
     for(let i = 0; i < ordersArr.length; i++) {
@@ -77,7 +80,7 @@ router.post('/reorder/portfolio', async(req, res) => {
     res.redirect(`/admin/portfolio`);
 })
 
-router.post('/update/collection/:collectionId/:collectionName', upload.fields([{name:'cover'}, {name: 'image'}]), isCollectionExists, createUploadFolder, async(req, res) => {
+router.post('/update/collection/:collectionId/:collectionName', isLoggedIn, upload.fields([{name:'cover'}, {name: 'image'}]), isCollectionExists, createUploadFolder, async(req, res) => {
     const title = req.body.title;
     const description = req.body.description;
     const collection = await CollectionSchema.findOne({_id:req.params.collectionId}).populate('description').populate('cover');
@@ -146,10 +149,11 @@ router.post('/update/collection/:collectionId/:collectionName', upload.fields([{
             );
         }
     }
+    uploadCleanup();
     res.redirect(`/admin/${req.params.collectionName}`);
 })
 
-router.route('/about')
+router.route('/about', isLoggedIn)
     .get(async(req,res) => {
         const descriptions = await DescriptionSchema.find({category: 'CV'}).sort({order: 1});
         res.render('admin/edit-about', {descriptions, admin:true});
@@ -168,7 +172,7 @@ router.route('/about')
         res.redirect('/admin/about');
     })
 
-router.route('/contact')
+router.route('/contact', isLoggedIn)
     .get(async(req, res) => {
         const iconDescriptions = await DescriptionSchema.find({category: 'Social'}).sort({order:1});
         res.render('admin/edit-contact', {iconDescriptions, admin:true})
@@ -190,7 +194,8 @@ router.route('/contact')
         res.redirect('/admin/contact');
     })
 
-router.get('/:collection', async(req, res) => {
+    /*
+router.get('/:collection', isLoggedIn, async(req, res) => {
     // res.send(`Collection: ${req.params.collection}`);
     const collectionName = req.params.collection;
     const options = {sort: [{'order': 'asc'}]};
@@ -198,21 +203,42 @@ router.get('/:collection', async(req, res) => {
     res.render('admin/edit-collection', {collection, admin:true})
 })
 
-router.delete('/all', async(req, res) => {
+router.delete('/:collection', isLoggedIn, async(req, res) => {
+    const {collection} = req.params;
+    const resp = await removeCollection(collection);
+    req.flash(resp[0], resp[1]);
+    res.redirect('./portfolio');
+})
+*/
+router.route('/:collection', isLoggedIn)
+    .get(async(req, res) => {
+        const collectionName = req.params.collection;
+        const options = {sort: [{'order': 'asc'}]};
+        const collection = await CollectionSchema.findOne({collectionName: collectionName}).populate({path: 'artworks', options}).populate('description');
+        res.render('admin/edit-collection', {collection, admin:true})
+    })
+    .delete(async(req, res) => {
+        const {collection} = req.params;
+        const resp = await removeCollection(collection);
+        req.flash(resp[0], resp[1]);
+        res.redirect('./portfolio');
+    })
+
+router.delete('/all', isLoggedIn, async(req, res) => {
     const collections = await CollectionSchema.find({});
     collections.forEach(collection => (removeCollection(collection.collectionName)));
     res.redirect('./portfolio')
 })
 
 
-router.delete('/artwork/:artworkId', async(req, res) => {
+router.delete('/artwork/:artworkId', isLoggedIn, async(req, res) => {
     let id = req.params.artworkId;
     const artwork = await ArtWorkSchema.findOne({_id: id}).populate('collectionSchema');
     const collectionId = artwork.collectionSchema._id;
     const artworkId = artwork._id;
     const order = artwork.order;
     await googleDriveUtil.deleteImageWithIds([artwork.thumbnailId, artwork.imageId]);
-    await ArtWorkSchema.remove({_id: id})
+    await ArtWorkSchema.deleteOne({_id: id})
     const artworks = await CollectionSchema.findOne({_id: collectionId}).populate('artworks');
     // const count = await CollectionSchema.findOne({_id: collectionId}).populate('artworks').countDocuments({});
     const count = await ArtWorkSchema.countDocuments({collectionSchema: collectionId}); // count cover, remove 1 img same length as expected
@@ -220,7 +246,7 @@ router.delete('/artwork/:artworkId', async(req, res) => {
         const updatedOrder = i - 1;
         ArtWorkSchema.findOneAndUpdate(
             {collectionSchema: collectionId, order: i},
-            {$set: {order: updatedOrder}}, // <------------------ syntax here
+            {$set: {order: updatedOrder}},
             function(err, docs) {
                 if(err) console.log(err)
                 else console.log(docs)
@@ -241,11 +267,6 @@ router.delete('/artwork/:artworkId', async(req, res) => {
     })  
 })
 
-router.delete('/:collection', async(req, res) => {
-    const {collection} = req.params;
-    const resp = await removeCollection(collection);
-    req.flash(resp[0], resp[1]);
-    res.redirect('./portfolio');
-})
+
 
 module.exports = router;

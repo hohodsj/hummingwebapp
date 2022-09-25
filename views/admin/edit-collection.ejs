@@ -29,15 +29,6 @@
     <% } %>
 </div>
 
-<!-- <form action="/admin/add/artworks-to-collection/<%=collection._id%>/<%=collection.collectionName%>" method="POST" class="validated-form" enctype="multipart/form-data">
-    <div class="input-group mb-3">
-        <label for="image">Images</label>
-        <input type="file" class="form-control" name="image" id="image" multiple>
-    </div>
-    <button type="btn" class="btn btn-success">Submit Image</button>
-</form> -->
-
-
 <div>
     <a href="./portfolio" class="outertext">
     <i class="fas fa-angle-left nav-arrow" aria-hidden="true">
@@ -45,3 +36,10 @@
     </i>
     </a>
 </div>
+
+<script>
+    let buttons = document.querySelectorAll('.btn-danger');
+    buttons.forEach(button => {
+        button.onclick = (event) => confirm(`You are about to delete the file ${button.value}, do you want to proceed?`);
+    })
+</script>
