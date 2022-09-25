@@ -2,10 +2,11 @@ const fs = require('fs');
 const CollectionSchema = require('./models/collectionSchema');
 
 module.exports.isLoggedIn = (req, res, next) => {
-    if(!req.isAuthenticated()) {
+    if(!req.isAuthenticated() || !req.user) {
         req.flash('error', 'you must be signed in');
         return res.redirect('/login');
     }
+    
     next();
 }
 
