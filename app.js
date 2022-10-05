@@ -10,7 +10,7 @@ const ArtWorkSchema = require('./models/artworkSchema');
 const CollectionSchema = require('./models/collectionSchema');
 const DescriptionSchema = require('./models/descriptionSchema');
 const passport = require('passport');
-const LocalStrategy = require('passport-local');
+// const LocalStrategy = require('passport-local');
 const GoogleStrategy = require('passport-google-oauth2').Strategy;
 const UserSchema = require('./models/userSchema');
 const methodOverride = require('method-override');
@@ -57,7 +57,7 @@ app.use(flash());
 
 app.use(passport.initialize());
 app.use(passport.session());
-passport.use(new LocalStrategy(UserSchema.authenticate()));
+// passport.use(new LocalStrategy(UserSchema.authenticate()));
 passport.use(new GoogleStrategy({
     clientID:     process.env.GOOGLE_DRIVE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_DRIVE_CLIENT_SECRET,
@@ -127,8 +127,8 @@ app.get('/google/callback',
 
 app.use('/admin', adminRoutes);
 
-app.get('/:collection', catchAsync(async (req, res) => {
-    const collectionName = req.params.collection;
+app.get('/collection/:collectionName', catchAsync(async (req, res) => {
+    const collectionName = req.params.collectionName;
     const options = {sort: [{'order': 'asc'}]};
     const collection = await CollectionSchema.findOne({collectionName: collectionName}).populate({path: 'artworks', options}).populate('description');
     // const artworks = collection.artworks;

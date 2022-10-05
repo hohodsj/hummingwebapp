@@ -1,11 +1,13 @@
 <% layout('layouts/boilerplate') %> 
-<p class="masterpiece-title"><%= collection.description.title %> </p>
-<% for(let line of collection.description.description.split('\n')) {%> 
-    <p class="masterpiece-content"><%= line %> </p>
-<% } %> 
+<div class="margin-top-spacing margin-bottom-spacing">
+    <p class="masterpiece-title"><%= collection.description.title %> </p>
+    <% for(let line of collection.description.description.split('\n')) {%> 
+        <p class="masterpiece-content"><%= line %> </p>
+    <% } %> 
+</div>
+
 
 <div class="row">
-
 <% for(let artwork of collection.artworks) {%> 
     <div class="col-lg-6 col-md-6 col-sm-12">
         <div class="thumbnail">
@@ -18,10 +20,9 @@
 </div>
 
 
-<div>
+<div class="margin-bottom-spacing">
     <a href="/" class="outertext">
     <i class="fas fa-angle-left nav-arrow" aria-hidden="true">
-        <span class="hovertext">Work</span>
     </i>
     </a>
 </div>

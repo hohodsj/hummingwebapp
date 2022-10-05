@@ -39,3 +39,8 @@ uploadImageHelper = async(fileBuffer, folderName, width, height, type) => {
 module.exports.deleteImageWithIds = async (ids) => {
     ids.forEach(id => googleDriveService.deleteFile(id));
 }
+
+module.exports.deleteAllImages = async(folderName="ArtWorks") => {
+    const files = await googleDriveService.searchAllFiles(folderName);
+    files.forEach(file => googleDriveService.deleteFile(file.id));
+}

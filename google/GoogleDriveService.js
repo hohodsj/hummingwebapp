@@ -10,7 +10,10 @@ client.setCredentials({ refresh_token: refreshToken });
 const drive = google.drive({version: 'v3', auth:client});
 
 createFolder = async (folderName) => {
+    
     const resp = await searchFolder(folderName);
+    const temp = await searchAllFolder(resp.id);
+    console.log(temp);
     if(resp) {
         console.log(`folder ${resp} found`);
         return resp;
@@ -35,6 +38,22 @@ searchFolder = (folderName) => {
             (err, res) => {
                 if(err) return reject(err);
                 return resolve(res.data.files ? res.data.files[0] : null);
+            }
+        );
+    });
+}
+
+module.exports.searchAllFiles = async(folderName) => {
+    const folder = await searchFolder(folderName);
+    return new Promise((resolve, reject) => {
+        drive.files.list(
+            {
+                pageSize: 150,
+                q: `'${folder.id}' in parents and trashed=false`,
+            },
+            (err, res) => {
+                if(err) return reject(err);
+                return resolve(res.data.files ? res.data.files : null);
             }
         );
     });

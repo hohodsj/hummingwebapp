@@ -786,5 +786,13 @@ h3{
 }
 .delete-button:hover{
   opacity: 0.5;
-  
+}
+
+/* collection spacing */
+.margin-top-spacing {
+  margin-top: 5%;
+}
+
+.margin-bottom-spacing {
+  margin-bottom: 5%;
 }

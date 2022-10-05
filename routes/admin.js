@@ -210,9 +210,9 @@ router.delete('/:collection', isLoggedIn, async(req, res) => {
     res.redirect('./portfolio');
 })
 */
-router.route('/:collection', isLoggedIn)
+router.route('/collection/:collectionName', isLoggedIn)
     .get(async(req, res) => {
-        const collectionName = req.params.collection;
+        const collectionName = req.params.collectionName;
         const options = {sort: [{'order': 'asc'}]};
         const collection = await CollectionSchema.findOne({collectionName: collectionName}).populate({path: 'artworks', options}).populate('description');
         res.render('admin/edit-collection', {collection, admin:true})
@@ -221,13 +221,17 @@ router.route('/:collection', isLoggedIn)
         const {collection} = req.params;
         const resp = await removeCollection(collection);
         req.flash(resp[0], resp[1]);
-        res.redirect('./portfolio');
+        res.redirect('/admin/portfolio');
     })
 
 router.delete('/all', isLoggedIn, async(req, res) => {
     const collections = await CollectionSchema.find({});
     collections.forEach(collection => (removeCollection(collection.collectionName)));
-    res.redirect('./portfolio')
+    await ArtWorkSchema.deleteMany({});
+    await CollectionSchema.deleteMany({});
+    await DescriptionSchema.deleteMany({category:"Collection"});
+    await googleDriveUtil.deleteAllImages();
+    res.redirect('/admin/portfolio')
 })
 
 
