@@ -10,7 +10,7 @@ const ArtWorkSchema = require('./models/artworkSchema');
 const CollectionSchema = require('./models/collectionSchema');
 const DescriptionSchema = require('./models/descriptionSchema');
 const passport = require('passport');
-//const LocalStrategy = require('passport-local');
+// const LocalStrategy = require('passport-local');
 const GoogleStrategy = require('passport-google-oauth2').Strategy;
 const UserSchema = require('./models/userSchema');
 const methodOverride = require('method-override');
@@ -62,7 +62,8 @@ passport.use(new GoogleStrategy({
     clientID:     process.env.GOOGLE_DRIVE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_DRIVE_CLIENT_SECRET,
     callbackURL: "/google/callback",
-    passReqToCallback   : true
+    passReqToCallback   : true,
+    proxy: true
   },
   async function(request, accessToken, refreshToken, profile, done) {
    UserSchema.findByUsername(profile.email, function(err, user){
@@ -126,9 +127,8 @@ app.get('/google/callback',
 
 app.use('/admin', adminRoutes);
 
-app.get('/:collection', catchAsync(async (req, res) => {
-    const collectionName = req.
-    rparams.collection;
+app.get('/collection/:collectionName', catchAsync(async (req, res) => {
+    const collectionName = req.params.collectionName;
     const options = {sort: [{'order': 'asc'}]};
     const collection = await CollectionSchema.findOne({collectionName: collectionName}).populate({path: 'artworks', options}).populate('description');
     // const artworks = collection.artworks;
@@ -136,7 +136,7 @@ app.get('/:collection', catchAsync(async (req, res) => {
     res.render('collection', {collection});
 }));
 
-const port = 3000;
+const port = process.env.PORT || 3000;
 app.listen(port, () => {
     console.log(`Listening on port ${port}`);
 })
