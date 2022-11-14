@@ -136,6 +136,11 @@ app.get('/collection/:collectionName', catchAsync(async (req, res) => {
     res.render('collection', {collection});
 }));
 
+app.get('/robots.txt', (req, res) => {
+    res.type('text/plain');
+    res.send("User-agent: *\nDisallow: /");
+})
+
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
     console.log(`Listening on port ${port}`);

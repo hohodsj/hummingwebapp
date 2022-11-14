@@ -10,10 +10,7 @@ client.setCredentials({ refresh_token: refreshToken });
 const drive = google.drive({version: 'v3', auth:client});
 
 createFolder = async (folderName) => {
-    
     const resp = await searchFolder(folderName);
-    const temp = await searchAllFolder(resp.id);
-    console.log(temp);
     if(resp) {
         console.log(`folder ${resp} found`);
         return resp;
