@@ -267,7 +267,7 @@ router.delete('/artwork/:artworkId', isLoggedIn, async(req, res) => {
         } else {
             req.flash('success', `Remove ${artwork.fileName} successfully`);
         }
-        res.redirect(`/admin/${artwork.collectionSchema.collectionName}`);
+        res.redirect(`/admin/collection/${artwork.collectionSchema.collectionName}`);
     })  
 })
 
