@@ -6,7 +6,7 @@
 <% for(let collection of collections) { %>
     <div class="col-md-6">
         <div class="thumbnail"> 
-            <img src="<%= collection.cover.thumbnailUrl%>">
+            <img src="<%= collection.cover.thumbnailUrl%>" alt="Humming Sang's Collection - <%= collection.collectionName%>">
             <div class="overlay">
                 <a href="/collection/<%= collection.collectionName%> " class="work-link"  title="Click To View Series">
                     <div class="text">

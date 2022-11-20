@@ -796,3 +796,7 @@ h3{
 .margin-bottom-spacing {
   margin-bottom: 5%;
 }
+
+.error-text {
+  font-size: 2em;
+}

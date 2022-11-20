@@ -3,7 +3,7 @@
     <h3 class="title-tag"><%=description.title%></h3>
     <ul class="cv-content">
         <% for(let des of description.description.toString().split('\r\n')) {%> 
-        <li><%= des %> </li>
+        <li><%- des %> </li>
         <% } %>
     </ul>
 <%}%>
