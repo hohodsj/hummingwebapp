@@ -16,6 +16,7 @@ const UserSchema = require('./models/userSchema');
 const methodOverride = require('method-override');
 const bodyParser = require('body-parser');
 const {buildSitemaps} = require('express-sitemap-xml');
+const ExpressError = require('./utils/ExpressError');
 
 
 const adminRoutes = require('./routes/admin');
@@ -149,6 +150,10 @@ app.get('/sitemap.xml', async (req,res) => {
     console.log(sitemaps);
     res.header('Content-Type', 'application/xml');
     res.send(sitemaps['/sitemap.xml']);
+});
+
+app.get('*', (req, res, next) => {
+    res.status(404).render('error');
 });
 
 const port = process.env.PORT || 3000;
