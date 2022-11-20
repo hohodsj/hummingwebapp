@@ -15,6 +15,7 @@ const GoogleStrategy = require('passport-google-oauth2').Strategy;
 const UserSchema = require('./models/userSchema');
 const methodOverride = require('method-override');
 const bodyParser = require('body-parser');
+const {buildSitemaps} = require('express-sitemap-xml');
 
 
 const adminRoutes = require('./routes/admin');
@@ -138,8 +139,17 @@ app.get('/collection/:collectionName', catchAsync(async (req, res) => {
 
 app.get('/robots.txt', (req, res) => {
     res.type('text/plain');
-    res.send("User-agent: *\nDisallow: /");
-})
+    res.send("User-agent: *\nAllow: /");
+});
+
+app.get('/sitemap.xml', async (req,res) => {
+    const collections = await CollectionSchema.find({});
+    const urls = collections.map(collection => `/collection/${collection.collectionName}`)
+    const sitemaps = await buildSitemaps(['/', '/about','/contact'].concat(urls), 'https://hummingsang.com');
+    console.log(sitemaps);
+    res.header('Content-Type', 'application/xml');
+    res.send(sitemaps['/sitemap.xml']);
+});
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
