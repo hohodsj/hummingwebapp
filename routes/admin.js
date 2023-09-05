@@ -17,7 +17,8 @@ const passport = require('passport');
 
 router.get('/portfolio', isLoggedIn, async(req, res) => {
     const collections = await CollectionSchema.find({}).populate('cover').sort({order:1});
-    res.render('admin/edit-portfolio', {collections, admin:true});
+    req.flash('success', 'You are now Admin')
+    res.render('admin/edit-portfolio', {collections, admin:true, success:req.flash("success")});
 });
 
 router.route('/create-collection', isLoggedIn)

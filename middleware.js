@@ -32,7 +32,7 @@ module.exports.isCollectionExists = async (req, res, next) => {
         }
         if(count > 0) {
             req.flash('error', `Collection: ${req.body.collectionName} already exists`);
-            res.render('admin/create-collection', {input:req.body});
+            res.render('admin/create-collection', {input:req.body, error: req.flash('error')});
             // return res.status(204).send();
         }
     })
