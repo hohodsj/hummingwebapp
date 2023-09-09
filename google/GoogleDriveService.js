@@ -80,3 +80,27 @@ module.exports.deleteFile = async(id) => {
         fileId: id
     });
 }
+
+module.exports.downloadFile = (filename, id, type) => {
+    return new Promise((resolve, reject) => {
+      var dest = fs.createWriteStream(`${filename}/${id}.${type}`);
+        drive.files.get(
+            {fileId: id, alt: "media"},
+            {responseType: "stream"},
+            (err, res) => {
+                if (err) {
+                    console.log(err)
+                    return reject(err)
+                }
+                return resolve(res.data
+                    .on("end", () => console.log(`${filename}/${id}.${type} download completed.`))
+                    .on("error", (err) => {
+                        console.log(err);
+                        return process.exit();
+                    })
+                    .pipe(dest)
+                )
+            }
+        )  
+    })
+}
