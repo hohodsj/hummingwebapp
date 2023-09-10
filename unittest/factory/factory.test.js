@@ -23,7 +23,7 @@ test('create artwork with thumbnail id, image id, file name, is horizontal, orde
     expect(generateArtworkSchema.fileName).toBe(createArtworkSchema.fileName)
     expect(generateArtworkSchema.isHorizontal).toBe(createArtworkSchema.isHorizontal)
     expect(generateArtworkSchema.order).toBe(createArtworkSchema.order)
-    expect(generateArtworkSchema.createDate).toBe(new Date())
+    expect(generateArtworkSchema.createDate.Date).toBe(new Date().Date)
 })
 
 test('create description with title, description, category, order', () => {
