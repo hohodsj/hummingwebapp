@@ -219,8 +219,8 @@ router.route('/collection/:collectionName', isLoggedIn)
         res.render('admin/edit-collection', {collection, admin:true})
     })
     .delete(async(req, res) => {
-        const {collection} = req.params;
-        const resp = await removeCollection(collection);
+        const {collectionName} = req.params;
+        const resp = await removeCollection(collectionName);
         req.flash(resp[0], resp[1]);
         res.redirect('/admin/portfolio');
     })
