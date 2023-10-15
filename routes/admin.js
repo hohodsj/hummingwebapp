@@ -151,7 +151,7 @@ router.post('/update/collection/:collectionId/:collectionName', isLoggedIn, uplo
         }
     }
     uploadCleanup();
-    res.redirect(`/admin/${req.params.collectionName}`);
+    res.redirect(`/admin/collection/${req.params.collectionName}`);
 })
 
 router.route('/about', isLoggedIn)

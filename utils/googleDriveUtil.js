@@ -32,7 +32,7 @@ module.exports.uploadImageToDrive = async (fileBuffer, type, folderName='ArtWork
 
 uploadImageHelper = async(fileBuffer, folderName, width, height, type) => {
     const fileName = `${uuid.v4()}`;
-    await sharp(fileBuffer).png({quality:100, progressive:true}).jpeg({quality:100, progressive:true}).resize({width: width, height: height}).toFile(`./uploads/${fileName}`);
+    await sharp(fileBuffer).png({quality:100, progressive:true}).jpeg({quality:100, progressive:true}).resize({width: width, height: height, fit:'inside'}).toFile(`./uploads/${fileName}`);
     const uploadImg = await googleDriveService.saveFile(fileName, `./uploads/${fileName}`, `image/${type}`, folderName)
     return uploadImg.data.id;
 }
