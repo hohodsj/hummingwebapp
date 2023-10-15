@@ -30,36 +30,36 @@ router.route('/create-collection', isLoggedIn)
         if(!req.files.cover || !req.files.image) {
             req.flash('error', `Cover and images cannot be empty`);
             // res.redirect('create-collection')
-            //res.render('admin/create-collection', {input:{collectionName:req.body.collectionName, description:req.body.description}});
-            return
-        }
-        const collectionName = req.body.collectionName;
-        const file = req.files.cover[0];
-        const [thumbnailId, imageId, isHorizontal] = await googleDriveUtil.uploadImageToDrive(file.buffer, file.originalname.split('.').pop());
-        const cover = createArtwork(thumbnailId, imageId, file.originalname, isHorizontal, -1);
-        await cover.save();
-
-        for(let i = 0; i < req.files.image.length; i++) {
-            const file = req.files.image[i];
+            res.render('admin/create-collection', {input:{collectionName:req.body.collectionName, description:req.body.description}, error:req.flash("error")});
+        } else {
+            const collectionName = req.body.collectionName;
+            const file = req.files.cover[0];
             const [thumbnailId, imageId, isHorizontal] = await googleDriveUtil.uploadImageToDrive(file.buffer, file.originalname.split('.').pop());
-            const artwork = createArtwork(thumbnailId, imageId, file.originalname, isHorizontal, i);
-            await artwork.save();
-            artworks.push(artwork);
-        }
-        const description = createDescription(collectionName, req.body.description, 'Collection');
-        description.save();
-        const collectionCount = await CollectionSchema.countDocuments({});
-        const collection = createCollection(collectionName, cover, collectionCount, artworks, description);
-        artworks.push(cover);
+            const cover = createArtwork(thumbnailId, imageId, file.originalname, isHorizontal, -1);
+            await cover.save();
 
-        artworks.forEach(artwork => {
-            artwork.collectionSchema = collection;
-            artwork.save();
-        })
-        await collection.save();
-        uploadCleanup();
-        req.flash('success', 'Successfully upload');
-        res.redirect('./portfolio');
+            for(let i = 0; i < req.files.image.length; i++) {
+                const file = req.files.image[i];
+                const [thumbnailId, imageId, isHorizontal] = await googleDriveUtil.uploadImageToDrive(file.buffer, file.originalname.split('.').pop());
+                const artwork = createArtwork(thumbnailId, imageId, file.originalname, isHorizontal, i);
+                await artwork.save();
+                artworks.push(artwork);
+            }
+            const description = createDescription(collectionName, req.body.description, 'Collection');
+            description.save();
+            const collectionCount = await CollectionSchema.countDocuments({});
+            const collection = createCollection(collectionName, cover, collectionCount, artworks, description);
+            artworks.push(cover);
+
+            artworks.forEach(artwork => {
+                artwork.collectionSchema = collection;
+                artwork.save();
+            })
+            await collection.save();
+            uploadCleanup();
+            req.flash('success', 'Successfully upload');
+            res.redirect('./portfolio');
+        }
     }))
 
 router.post('/reorder/portfolio', isLoggedIn, async(req, res) => {
@@ -270,6 +270,10 @@ router.delete('/artwork/:artworkId', isLoggedIn, async(req, res) => {
         }
         res.redirect(`/admin/collection/${artwork.collectionSchema.collectionName}`);
     })  
+})
+
+router.get('*', isLoggedIn, (req, res) => {
+    res.status(404).render('admin/admin-error');
 })
 
 
