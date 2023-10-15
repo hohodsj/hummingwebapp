@@ -1,6 +1,7 @@
 const googleDriveService = require('../google/GoogleDriveService');
 const uuid = require('uuid');
 const sharp = require('sharp');
+const fs = require('fs')
 /*
 module.exports.uploadImageToDrive = async (file, folderName='ArtWorks') => {
         const metadata = await sharp(file.buffer).metadata();
@@ -43,4 +44,22 @@ module.exports.deleteImageWithIds = async (ids) => {
 module.exports.deleteAllImages = async(folderName="ArtWorks") => {
     const files = await googleDriveService.searchAllFiles(folderName);
     files.forEach(file => googleDriveService.deleteFile(file.id));
+}
+
+module.exports.downloadImages = async(imageInfos) => {
+    const path = './public/images'
+    if(!fs.existsSync(path)){
+        fs.mkdirSync(path);
+    }
+    const promises = []
+    imageInfos.forEach(async(imageInfo) => {
+        if (!fs.existsSync(`${path}/${imageInfo.id}.${imageInfo.type}`)) {
+            promises.push(googleDriveService.downloadFile(path, imageInfo.id, imageInfo.type))
+        }
+    })
+    await Promise.all(promises)
+}
+
+module.exports.searchAllFiles = async(folderName="ArtWorks") => {
+    return await googleDriveService.searchAllFiles(folderName)
 }

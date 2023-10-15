@@ -5,7 +5,7 @@
     <p>Showing art works</p>
     <% for(let collection of collections) { %>
         <div class="col-md-6" data-id="<%= collection.order%>">
-            <form action="/admin/<%= collection.collectionName %>?_method=DELETE" method="POST" class="delete_button">
+            <form action="/admin/collection/<%= collection.collectionName %>?_method=DELETE" method="POST" class="delete_button">
                 <button type="btn" class="btn btn-danger" value="<%= collection.collectionName %>"><i class="fa fa-times"></i></button>
             </form>
             <div class="thumbnail"> 

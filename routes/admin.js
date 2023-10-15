@@ -17,7 +17,8 @@ const passport = require('passport');
 
 router.get('/portfolio', isLoggedIn, async(req, res) => {
     const collections = await CollectionSchema.find({}).populate('cover').sort({order:1});
-    res.render('admin/edit-portfolio', {collections, admin:true});
+    req.flash('success', 'You are now Admin')
+    res.render('admin/edit-portfolio', {collections, admin:true, success:req.flash("success")});
 });
 
 router.route('/create-collection', isLoggedIn)
@@ -218,8 +219,8 @@ router.route('/collection/:collectionName', isLoggedIn)
         res.render('admin/edit-collection', {collection, admin:true})
     })
     .delete(async(req, res) => {
-        const {collection} = req.params;
-        const resp = await removeCollection(collection);
+        const {collectionName} = req.params;
+        const resp = await removeCollection(collectionName);
         req.flash(resp[0], resp[1]);
         res.redirect('/admin/portfolio');
     })

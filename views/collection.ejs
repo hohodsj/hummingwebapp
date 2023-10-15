@@ -1,17 +1,17 @@
 <% layout('layouts/boilerplate') %> 
 <div class="margin-top-spacing margin-bottom-spacing">
-    <p class="masterpiece-title"><%= collection.description.title %> </p>
-    <% for(let line of collection.description.description.split('\n')) {%> 
+    <p class="masterpiece-title"><%= description.title %> </p>
+    <% for(let line of description.description.split('\n')) {%> 
         <p class="masterpiece-content"><%= line %> </p>
     <% } %> 
 </div>
 
 
 <div class="row">
-<% for(let artwork of collection.artworks) {%> 
+<% for(let artwork of formattedArtWork) {%> 
     <div class="col-lg-6 col-md-6 col-sm-12">
         <div class="thumbnail">
-            <a data-fancybox="gallery" href="<%= artwork.thumbnailUrl%>" title="Click To Enlarge"><img src="<%= artwork.imageUrl%>" alt="By Humming Sang">
+            <a data-fancybox="gallery" href="<%= artwork.thumbnailSrc%>" title="Click To Enlarge"><img src="<%= artwork.imageSrc%>" alt="By Humming Sang">
                 <div class="overlay-pic"></div>
             </a>
         </div>

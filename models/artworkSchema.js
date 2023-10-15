@@ -34,4 +34,8 @@ ArtWorkSchema.virtual('imageUrl').get(function() {
     return `https://drive.google.com/uc?id=${this.imageId}`;
 })
 
+ArtWorkSchema.virtual('fileType').get(function() {
+    return `${this.fileName.split('.')[this.fileName.split('.').length - 1]}`
+})
+
 module.exports = mongoose.model('ArtWorkSchema', ArtWorkSchema);

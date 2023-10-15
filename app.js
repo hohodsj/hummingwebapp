@@ -17,7 +17,10 @@ const methodOverride = require('method-override');
 const bodyParser = require('body-parser');
 const {buildSitemaps} = require('express-sitemap-xml');
 const ExpressError = require('./utils/ExpressError');
-
+const {downloadImages} = require('./utils/googleDriveUtil');
+const fs = require("fs")
+const {periodicRemove} = require('./utils/deleteUtils')
+const cron = require('node-cron')
 
 const adminRoutes = require('./routes/admin');
 
@@ -60,6 +63,7 @@ app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
 // passport.use(new LocalStrategy(UserSchema.authenticate()));
+// Google Drive project share same client id and secret
 passport.use(new GoogleStrategy({
     clientID:     process.env.GOOGLE_DRIVE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_DRIVE_CLIENT_SECRET,
@@ -83,6 +87,12 @@ passport.deserializeUser(UserSchema.deserializeUser());
 //     done(null, user);
 // })
 
+// cron clean up
+cron.schedule('0 6 * * *', async () => {
+    console.log(`Running cron job to cleanup at 6am`)
+    await periodicRemove();
+})
+
 app.use((req, res, next) => {
     res.locals.activeLocation = req.path;
     res.locals.success = req.flash('success');
@@ -92,8 +102,19 @@ app.use((req, res, next) => {
 
 app.get('/', catchAsync(async (req, res) => {
     const collections = await CollectionSchema.find({}).populate('cover').sort({order:1});
-    // collections.forEach(x => console.log(JSON.stringify(x)));
-    res.render('portfolio', {collections});
+    // save images to local
+    const imageInfos = collections.map(collection => ({id: collection.cover.thumbnailId, type:collection.cover.fileType}))
+    // background process of downloading images
+    downloadImages(imageInfos)
+
+    // dynamically selecting if select google drive url or from disk
+    const path = './public/images'
+    const formattedCollections = collections.map(c => ({
+        collectionName : c.collectionName,
+        isHorizontal: c.cover.isHorizontal,
+        src: fs.existsSync(`${path}/${c.cover.thumbnailId}.${c.cover.fileType}`) ? `/images/${c.cover.thumbnailId}.${c.cover.fileType}` : c.cover.thumbnailUrl
+    }))
+    res.render('portfolio', {formattedCollections});
 }));
 
 app.get('/about', async (req, res) => {
@@ -134,8 +155,18 @@ app.get('/collection/:collectionName', catchAsync(async (req, res) => {
     const options = {sort: [{'order': 'asc'}]};
     const collection = await CollectionSchema.findOne({collectionName: collectionName}).populate({path: 'artworks', options}).populate('description');
     // const artworks = collection.artworks;
-
-    res.render('collection', {collection});
+    const thumbnailImageInfos = collection.artworks.map(artwork => ({id: artwork.thumbnailId, type:artwork.fileType}))
+    const actualImageInfos = collection.artworks.map(artwork => ({id: artwork.imageId, type:artwork.fileType}))
+    // download in background
+    downloadImages([...thumbnailImageInfos, ...actualImageInfos])
+     // dynamically selecting if select google drive url or from disk
+    const path = './public/images'
+    const description = {title: collection.description.title, description: collection.description.description}
+    const formattedArtWork = collection.artworks.map(c => ({
+        thumbnailSrc: fs.existsSync(`${path}/${c.thumbnailId}.${c.fileType}`) ? `/images/${c.thumbnailId}.${c.fileType}` : c.thumbnailUrl,
+        imageSrc: fs.existsSync(`${path}/${c.imageId}.${c.fileType}`) ? `/images/${c.imageId}.${c.fileType}` : c.imageUrl
+    }))
+    res.render('collection', {description, formattedArtWork});
 }));
 
 app.get('/robots.txt', (req, res) => {
