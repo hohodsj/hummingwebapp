@@ -15,6 +15,66 @@ h1  {
   margin-bottom: 0px;
 }
 
+.col {
+  position: relative;
+}
+
+.overlay {
+  position: absolute;
+  top: 0px;
+  bottom: 0;
+  left: 0px;
+  right: 0;
+  height: 100%;
+  width: 100%;
+  opacity: 0;
+  transition: .5s ease;
+  background-color:rgba(0,0,0,1);
+}
+
+.overlay:hover {
+  opacity: 0.4;
+}
+
+.overlay-text {
+  text-align: center;
+  position: relative;
+  top: 45%;
+  color: #fff;
+  font-size: 28px;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+.navbar-tag{
+  margin-left: 40px;
+  margin-right: 40px;
+  margin-top: 20px;
+  text-align: center;
+  font-family: Expletus Sans;
+  font-size: 28px;
+  font-weight: bold;
+  color:#8D8A86 !important;
+}
+
+.navbar-tag:hover {
+  color: #f8bab7 !important;
+  text-decoration: none;
+}  
+
+.nav-light .navbar-toggler
+{
+  outline:none;
+  box-shadow: none;
+  border-style: none;
+}
+
+.nav-font {
+  font-family: Expletus Sans;
+  font-stretch: 200%;
+}
+/*
+-----------------------------------
+*/
 
 /*Make CV Work Contact Center*/
 #menu {
@@ -37,12 +97,14 @@ a:hover {
 
 /*nav bar changes*/
 /*background match body*/
+/*
 .navbar-default{
   background:#f4f0ee;
 
 }
+*/
+/*
 .navbar.navbar-default {
-    /*background-color: #99ccff;*/
     border: 0;
     -webkit-box-shadow: none;
     box-shadow: none;
@@ -53,24 +115,11 @@ a:hover {
     -webkit-box-shadow: none;
     box-shadow: none;
 }
+*/
 
 /*navbar buttons CV Work Contact Attributes*/
-.navbar-tag{
-  margin-left: 40px;
-  margin-right: 40px;
-  margin-top: 20px;
-  text-align: center;
-  font-family: Expletus Sans;
-  font-size: 28px;
-  font-weight: bold;
-  /*text-transform: uppercase;*/
-  /*word-spacing:5em; */
-  color:#8D8A86 !important;
-}
-.navbar-tag:hover {
-  color: #f8bab7 !important;
-  text-decoration: none;
-}  
+
+
 
 /*Hover with text*/
 .internal-link-style{
@@ -125,62 +174,68 @@ a:hover {
     color:#f8bab7;
 }
 
-
+/*
 .navbar-tag-inner{
   text-align: center;
   font-weight: bold;
-  /*text-transform: uppercase;*/
-  /*word-spacing:5em; */
   color:#8D8A86 !important;
 }
 .navbar-tag-inner:hover {
     color: #f8bab7 !important;
     text-decoration: none;
 }  
+*/
 
 /*Center the navbar*/
+/*
 .navbar .navbar-nav {
   display: inline-block;
   float: none;
   vertical-align: top;
 }
+*/
+
 
 .navbar .navbar-collapse {
   text-align: center;
 }
 
+/*
 .navbar-toggle {
-  /*width: 100%;*/
   float: right;
   margin-right: 25px;
   margin-top: -90px;
   padding: 0;
 }
+*/
 
 /*style the menu icon */
+/*icon bar size change here*/
+/*
 .navbar-toggle .icon-bar {
-  /*icon bar size change here*/
+  
   height: 6px;
   width: 50px;
   margin-top: 10px !important;
   margin-bottom: 10px !important;
-  /*round menu icon at both ends*/
   border-radius: 5px !important;
 }
 
 .navbar-default .navbar-toggle {
   border-color:#f4f0ee;
 }
-
+*/
 /*style menu icon*/
+/*
 .navbar-default .navbar-toggle .icon-bar {
     background-color: #8D8A86;
 }
-
+*/
+/*
 .navbar-collapse {
   margin-left: 30%
 }
-
+*/
 .icon-bar{
   margin-left:0;
   margin-right:0;
@@ -262,9 +317,11 @@ a:hover {
   h1{
     font-size:70px;
   }
+  
   .navbar-header {
       float: none;
   }
+  /*
   .navbar-left,.navbar-right {
       float: none !important;
   }
@@ -296,13 +353,15 @@ a:hover {
   .collapse.in{
       display:block !important;
   }
-
+  */
 }
 
 @media (max-width: 650px){
+  /*
   .navbar-toggle {
     margin-top:0;
   }
+  */
 }
 
 
@@ -311,10 +370,10 @@ a:hover {
 html, body{
   height: 100%;
 }
-#main{
+/* #main{
   overflow: auto;
-  padding-bottom:180px;
-}
+  padding-bottom:10px;
+} */
 
 #wrap{
   min-height: 100%
@@ -427,12 +486,13 @@ input{
 
 /*Attribute affects index.html(work)*/
 /*thumbnail no white spacing:pic no fram*/
+/*
 .thumbnail{
 	padding: 0;
   border:0 none;
   box-shadow: none;
 }
-
+*/
 /*Sculpture, Drawing, Photography Set-Design text show when higlight*/
 .text {
   color: white;
@@ -443,10 +503,10 @@ input{
   transform: translate(-50%, -50%);
   -ms-transform: translate(-50%, -50%);
   text-align: center;
-  width:100%;
-  height:100%;
+  /*width:100%;
+  height:100%;*/
 }
-
+/*
 .overlay-pic {
   position: absolute;
   top: -10px;
@@ -463,21 +523,11 @@ input{
 .overlay-pic:hover {
   opacity: 0.4;
 }
-
+*/
 /*hover on project and show name*/
-.overlay {
-  position: absolute;
-  top: -10px;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 100%;
-  width: 100%;
-  opacity: 0;
-  transition: .5s ease;
-  background-color:rgba(0,0,0,1);
-}
 
+
+/*
 @media(max-width: 1200px){
   .overlay {
     top:-5px;
@@ -493,16 +543,13 @@ input{
     background-color:rgba(0,0,0,0);
   }
 }
-.overlay:hover {
-  opacity: 0.4;
-}
+*/
+
+
 
 .work-link{
   font-size: 28px; 
 	margin: 30% 30%;
-}
-.work-link-edit{
-  font-size: 28px; 
 }
 
 .work-link-verti{
@@ -775,28 +822,4 @@ li.dropdown:hover > .dropdown-menu {
 
 h3{
   margin-top: 25px;
-}
-
-/* delete button for images/collection */
-.delete-button{
-  position: relative;
-  top: 34px;
-  float: right;
-  z-index: 1;
-}
-.delete-button:hover{
-  opacity: 0.5;
-}
-
-/* collection spacing */
-.margin-top-spacing {
-  margin-top: 5%;
-}
-
-.margin-bottom-spacing {
-  margin-bottom: 5%;
-}
-
-.error-text {
-  font-size: 2em;
 }

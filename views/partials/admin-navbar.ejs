@@ -1,22 +1,15 @@
-<!-- <div class="container" id="navbar-position"> -->
-<nav class="navbar navbar-default">
-    <div class="container-fluid">
-    <!-- Brand and toggle get grouped for better mobile display -->
-        <div class="navbar-header">
-            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
+<nav class="navbar navbar-expand-lg navbar-light">
+    <div class="mx-auto">
+        <a class="display-1 nav-font" href="/">Humming Sang</a>
+        <button class="navbar-toggler float-right border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse mt-3 offset-md-3" id="navbarNavAltMarkup">
+            <div class="navbar-nav">
+                <a href="/admin/about" class="navbar-tag <%= activeLocation == '/admin/about' ? 'current-page' : '' %>">CV</a>
+                <a href="/admin/portfolio" class="navbar-tag <%= (activeLocation != '/admin/about' && activeLocation != '/admin/contact') ? 'current-page' : '' %>">Work</a>
+                <a href="/admin/contact" class="navbar-tag <%= activeLocation == '/admin/contact' ? 'current-page' : ''%>">Contact</a>
+            </div>
         </div>
-
-        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-        <ul class="nav navbar-nav">
-            <li><a href="/admin/about" class="navbar-tag <%= activeLocation == '/admin/about' ? 'current-page' : '' %>">CV</a></li>
-            <li><a href="/admin/portfolio" class="navbar-tag <%= (activeLocation != '/admin/about' && activeLocation != '/admin/contact') ? 'current-page' : '' %>">Work</a></li>
-            <li><a href="/admin/contact" class="navbar-tag <%= activeLocation == '/admin/contact' ? 'current-page' : ''%>">Contact</a></li>
-        </ul>
-        </div><!-- /.navbar-collapse -->
-    </div><!-- /.container-fluid -->
+    </div>
 </nav>
