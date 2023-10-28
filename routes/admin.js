@@ -81,6 +81,7 @@ router.post('/reorder/portfolio', isLoggedIn, async(req, res) => {
     res.redirect(`/admin/portfolio`);
 })
 
+// Update collection, add/remove image, update title/description
 router.post('/update/collection/:collectionId/:collectionName', isLoggedIn, upload.fields([{name:'cover'}, {name: 'image'}]), isCollectionExists, createUploadFolder, async(req, res) => {
     const title = req.body.title;
     const description = req.body.description;

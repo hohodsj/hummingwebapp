@@ -5,15 +5,22 @@
     <label for="description">Description</label>
     <textarea class="form-control" name="description" rows="3"><%=collection.description.description%></textarea>
     <input type="text" id="orders" name="orders" style="display:none">
-    <div class="input-group mb-3">
-        <label for="cover-image">Cover</label>
-        <input type="file" class="form-control" name="cover">
+    <div class="mb-3">
+        <label for="cover-image" class="form-label">Cover</label>
+        <input type="file" class="form-control" name="cover" id="cover-img" onchange="preview()">
+        <button type="button" onclick="clearImage()" class="btn btn-primary mt-3">Remove Cover Image</button>
     </div>
-    <div class="input-group mb-3">
-        <label for="image">Images</label>
-        <input type="file" class="form-control" name="image" id="image" multiple>
+    <!-- shows cover image -->
+    <img id="frame" src="" class="img-fluid" />
+
+    <div class="upload_box">
+        <div class="mb-3">
+            <label for="image" class="form-label">Images</label>
+            <input type="file" class="form-control upload-art-works" name="image" id="image" onchange="previews()" multiple>
+        </div>
+        <div id="upload-group"></div>
+        <button type="btn" class="btn btn-success">Save</button>
     </div>
-    <button type="btn" class="btn btn-success">Save</button>
 </form>
 
 <div class="row" id="grid-card">
@@ -37,8 +44,61 @@
 </div>
 
 <script>
-    let buttons = document.querySelectorAll('.btn-danger');
-    buttons.forEach(button => {
-        button.onclick = (event) => confirm(`You are about to delete the file ${button.value}, do you want to proceed?`);
-    })
+    var imgHashMap = new Map();
+    function previews() {
+        // get list of the current dragged images
+        var imgs = event.target.files
+        console.log(event.target.files)
+        console.log(`imgHashMap size:${imgHashMap.size}`)
+        // find the element where we will append images to
+        var uploads = document.getElementById("upload-group");
+        for(var img of imgs) {
+            // if already added skip
+            if (imgHashMap.has(img.name)) {
+                console.log('Existed')
+                continue
+            } 
+            console.log(`img:${img}`)
+            imgHashMap.set(img.name, img)
+            // var html = document.createElement("img")
+            // html.src = URL.createObjectURL(img)
+            var image = createImage(img)
+            uploads.appendChild(image)
+        }
+        console.log('imgHashMap')
+        for(var img of imgHashMap)
+            console.log(`img:${img}`)
+        
+        updateFileList()
+    }
+
+    function createImage(imgSrc){
+        var div = document.createElement("div")
+        var image = document.createElement("img")
+        var closeButton = document.createElement("button");
+        closeButton.data = imgSrc.name;
+        closeButton.classList.add("btn-close")
+        closeButton.type = "button"
+        closeButton.onclick = function() {
+            console.log(`Deleting ${this.data}`)
+            imgHashMap.delete(imgSrc.name)
+            closeButton.parentNode.parentNode.removeChild(closeButton.parentNode)
+            updateFileList()
+        }
+        image.src = URL.createObjectURL(imgSrc)
+        div.appendChild(image)
+        div.appendChild(closeButton)
+        return div
+    }
+    function updateFileList(){
+        const input = document.getElementById("image")
+        let list = new DataTransfer()
+        for(const [imgName, imgFile] of imgHashMap.entries()) {
+            console.log(`iter res: ${imgName} : ${imgFile}`)
+            let file = new File([imgFile], imgName)
+            list.items.add(file)
+        }
+        let myFileList = list.files
+        input.files = myFileList
+    }
 </script>
