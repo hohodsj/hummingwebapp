@@ -8,10 +8,9 @@
     <div class="mb-3">
         <label for="cover-image" class="form-label">Cover</label>
         <input type="file" class="form-control" name="cover" id="cover-img" onchange="preview()">
-        <button type="button" onclick="clearImage()" class="btn btn-primary mt-3">Remove Cover Image</button>
+        <!-- shows cover image -->
+        <img id="frame" src="<%=collection.cover.thumbnailUrl%>" class="img-fluid" />
     </div>
-    <!-- shows cover image -->
-    <img id="frame" src="" class="img-fluid" />
 
     <div class="upload_box">
         <div class="mb-3">

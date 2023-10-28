@@ -216,7 +216,7 @@ router.route('/collection/:collectionName', isLoggedIn)
     .get(async(req, res) => {
         const collectionName = req.params.collectionName;
         const options = {sort: [{'order': 'asc'}]};
-        const collection = await CollectionSchema.findOne({collectionName: collectionName}).populate({path: 'artworks', options}).populate('description');
+        const collection = await CollectionSchema.findOne({collectionName: collectionName}).populate({path: 'artworks', options}).populate('description').populate({path: 'cover'});
         res.render('admin/edit-collection', {collection, admin:true})
     })
     .delete(async(req, res) => {
