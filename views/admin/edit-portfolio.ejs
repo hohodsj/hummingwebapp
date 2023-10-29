@@ -1,28 +1,26 @@
 <% layout('layouts/boilerplate') %> 
 <p>You must be login to see this TODO: Change this to flash later and add edit boiler plate</p>
-<div class="row" id="grid-card">
 <!-- Hover with text and link example -->
-    <p>Showing art works</p>
+<!-- https://www.youtube.com/watch?v=eTrpkJVwmaw&ab_channel=SonarSystems -->
+<!-- https://github.com/SonarSystems/Bootstrap-5-Tutorial-Source-Code/blob/132d128161876b295fc1f4e6ce402ef14fc9d246/Code/%5B3%5D%20Components/Card%20Masonry%20Layout/index.html#L16 -->
+<p>Showing art works</p>
+<div class="row row-cols-1 row-cols-md-2 g-4" id="grid-card" data-masonry='{"percentPosition": true,  "itemSelector": ".col" }'>
     <% for(let collection of collections) { %>
-        <div class="col-md-6" data-id="<%= collection.order%>">
+        <div class="col" data-id="<%= collection.order%>">
+            <a href="/admin/collection/<%= collection.collectionName%> " title="Click To View Series" >
+                <img src="<%= collection.cover.thumbnailUrl%>" class="card-img-top">
+                <p><%=collection.collectionName%><br/>
+                    <i class="glyphicon glyphicon-th"></i>
+                </p>
+            </a>
             <form action="/admin/collection/<%= collection.collectionName %>?_method=DELETE" method="POST" class="delete_button">
-                <button type="btn" class="btn btn-danger" value="<%= collection.collectionName %>"><i class="fa fa-times"></i></button>
+                <button type="btn" class="btn btn-danger" value="<%= collection.collectionName %>">Delete</button>
             </form>
-            <div class="thumbnail"> 
-                <img src="<%= collection.cover.thumbnailUrl%>">
-                <!-- <div class="overlay"> -->
-                    <a href="/admin/collection/<%= collection.collectionName%> " class="work-link-edit"  title="Click To View Series">
-                        <div class="text" style="width: 70%">
-                            <p class=<%= collection.cover.isHorizontal ? "work-link" : "work-link-verti" %>><%=collection.collectionName%><br/>
-                                <i class="glyphicon glyphicon-th"></i>
-                            </p>
-                        </div>
-                    </a>
-                <!-- </div> -->
-            </div>
         </div>
     <% } %> 
 </div>
+
+
 <form action="/admin/create-collection" class="fixed-bottom" method="GET">
     <button class="btn btn-success">+</button>
 </form>
@@ -33,9 +31,9 @@
     <input type="text" id="orders" name="orders" style="display:none">
     <button type="btn" class="btn btn-success" style="display:none" id="save-button">Save</button>
 </form>
-<script>
+<!-- <script>
     let buttons = document.querySelectorAll('.btn-danger');
     buttons.forEach(button => {
         button.onclick = (event) => confirm(`You are about to delete the collection ${button.value}, do you want to proceed?`);
     })
-</script>
+</script> -->

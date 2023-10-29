@@ -3,20 +3,14 @@
 <!-- Hover with text and link example -->
 <div class="row">
 
-<% for(let collection of formattedCollections) { %>
-    <div class="col-md-6">
-        <div class="thumbnail"> 
-            <img src="<%= collection.src%>" alt="Humming Sang's Collection - <%= collection.collectionName%>">
-            <div class="overlay">
-                <a href="/collection/<%= collection.collectionName%> " class="work-link"  title="Click To View Series">
-                    <div class="text">
-                        <p class=<%= collection.isHorizontal ? "work-link" : "work-link-verti" %>><%=collection.collectionName%><br/>
-                            <i class="glyphicon glyphicon-th"></i>
-                        </p>
-                    </div>
-                </a>
-            </div>
+    <% for(let collection of formattedCollections) { %>
+        <div class="col col-12 col-md-6 p-3">
+            <a href="/collection/<%= collection.collectionName%> " title="Click To View Series">
+                <img src="<%= collection.src%>" class="img-thumbnail p-0" alt="Humming Sang's Collection - <%= collection.collectionName%>">
+                <div class="overlay">
+                    <p class="overlay-text"><%=collection.collectionName%> <br> <i class="fa-solid fa-grip"></i></p> 
+                </div>
+            </a>
         </div>
-    </div>
-<% } %> 
+    <% } %>
 </div>

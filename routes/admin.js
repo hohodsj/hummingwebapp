@@ -81,6 +81,7 @@ router.post('/reorder/portfolio', isLoggedIn, async(req, res) => {
     res.redirect(`/admin/portfolio`);
 })
 
+// Update collection, add/remove image, update title/description
 router.post('/update/collection/:collectionId/:collectionName', isLoggedIn, upload.fields([{name:'cover'}, {name: 'image'}]), isCollectionExists, createUploadFolder, async(req, res) => {
     const title = req.body.title;
     const description = req.body.description;
@@ -215,7 +216,7 @@ router.route('/collection/:collectionName', isLoggedIn)
     .get(async(req, res) => {
         const collectionName = req.params.collectionName;
         const options = {sort: [{'order': 'asc'}]};
-        const collection = await CollectionSchema.findOne({collectionName: collectionName}).populate({path: 'artworks', options}).populate('description');
+        const collection = await CollectionSchema.findOne({collectionName: collectionName}).populate({path: 'artworks', options}).populate('description').populate({path: 'cover'});
         res.render('admin/edit-collection', {collection, admin:true})
     })
     .delete(async(req, res) => {
