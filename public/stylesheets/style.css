@@ -312,6 +312,12 @@ a:hover {
   border-width: 0px;
 }
 
+/* Preview images */
+.preview{
+  width: 200px;
+  height: 200px;
+}
+
 /*Navbar collapse at bigger dimension*/
 @media (max-width: 1100px) {
   h1{
@@ -379,15 +385,13 @@ html, body{
   min-height: 100%
 }
 
-#footer {
+/* #footer {
   position: relative;
   margin-top: -180px;
-  /* negative value of footer height */
+  negative value of footer height
   height: 180px;
-  /*clear: both;*/
-  /*left: 50%;*/
   font-size: 11px;
-}
+} */
 
 body:before {
   content: "";
