@@ -60,8 +60,45 @@
         <script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha384-GNFwBvfVxBkLMJpYMOABq3c+d3KnQxudP/mGPkzpZSTYykLBNsZEnG2D9G/X/+7D" crossorigin="anonymous" async></script>
         
         <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
-        <script type="text/javascript" src="./js/anime.js"></script>
+        <script type="text/javascript" src="/javascripts/anime.js"></script>
         <script>
+            var msnry = new Masonry('.row', {
+                itemSelector: '.col',
+                percentPosition: true
+            });
+            setTimeout(function () {
+                msnry.layout();
+            }, 100);
+
+            setTimeout(function () {
+                msnry.layout();
+            }, 300);
+
+            setTimeout(function () {
+                msnry.layout();
+            }, 1000);
+
+            setTimeout(function () {
+                msnry.layout();
+            }, 5000);
+        </script>
+        <!-- <script>
+            var $grid = document.querySelector('.row');
+            var msnry = new Masonry($grid, {
+                itemSelector: '.col',
+                percentPosition: true
+            });
+    
+            var $images = $grid.querySelectorAll('.card-img-top');
+            $images.forEach(function (el) {
+                el.addEventListener('load', function () {
+                    console.log("Image is loaded: " + el.getAttribute("src"));
+                    msnry.layout();
+                });
+            });
+        </script> -->
+        <script>
+            
             Sortable.create(document.getElementById('grid-card'), {
                     group: 'shared',
                     animation: 150,
@@ -82,42 +119,7 @@
                     }
                     
                 })
-        </script>
-        <!-- <script>
-            var msnry = new Masonry('.row', {
-                itemSelector: '.col',
-                percentPosition: true
-            });
-            setTimeout(function () {
-                msnry.layout();
-            }, 100);
-
-            setTimeout(function () {
-                msnry.layout();
-            }, 300);
-
-            setTimeout(function () {
-                msnry.layout();
-            }, 1000);
-
-            setTimeout(function () {
-                msnry.layout();
-            }, 5000);
-        </script> -->
-        <script>
-            var $grid = document.querySelector('.row');
-            var msnry = new Masonry($grid, {
-                itemSelector: '.col',
-                percentPosition: true
-            });
-    
-            var $images = $grid.querySelectorAll('.card-img-top');
-            $images.forEach(function (el) {
-                el.addEventListener('load', function () {
-                    console.log("Image is loaded: " + el.getAttribute("src"));
-                    msnry.layout();
-                });
-            });
+                
         </script>
     </body>
     <%-include('../partials/footer') %> 
