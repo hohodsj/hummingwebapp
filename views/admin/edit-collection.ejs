@@ -22,21 +22,21 @@
     </div>
 </form>
 
-<div class="row" id="grid-card">
+<div class="row row-cols-1 row-cols-md-2 g-4" data-masonry='{"percentPosition": true,  "itemSelector": ".col" }'>
     <% for(let artwork of collection.artworks) {%> 
-        <div class="col-md-6" data-id="<%=artwork.order%>">
+        <div class="col" data-id="<%=artwork.order%>">
             <form action="/admin/artwork/<%= artwork._id%>?_method=DELETE" method="POST" class="delete_button">
                 <button type="btn" class="btn btn-danger" value="<%= artwork.fileName %>"><i class="fa fa-times"></i></button>
             </form>
             <div class="thumbnail">
-                <img src="<%= artwork.thumbnailUrl%>">
+                <img src="<%= artwork.thumbnailUrl%>" class="card-img-top">
             </div>
         </div>
     <% } %>
 </div>
 
 <div>
-    <a href="/admin/portfolio" class="outertext">
+    <a href="/admin/portfolio" class="fixed-bottom">
     <i class="fas fa-angle-left fa-shake nav-arrow" aria-hidden="true">
     </i>
     </a>
@@ -72,11 +72,17 @@
     }
 
     function createImage(imgSrc){
-        var div = document.createElement("div")
+        // Create Image
         var image = document.createElement("img")
+        image.style.maxWidth = "100%";
+        image.style.maxHeight = "100%";
+        image.src = URL.createObjectURL(imgSrc)
+
+        // Create Close Button
         var closeButton = document.createElement("button");
         closeButton.data = imgSrc.name;
         closeButton.classList.add("btn-close")
+        closeButton.classList.add("btn-outline-danger")
         closeButton.type = "button"
         closeButton.onclick = function() {
             console.log(`Deleting ${this.data}`)
@@ -84,7 +90,19 @@
             closeButton.parentNode.parentNode.removeChild(closeButton.parentNode)
             updateFileList()
         }
-        image.src = URL.createObjectURL(imgSrc)
+        closeButton.style.display = "block"
+        closeButton.style.position = "absolute"
+        closeButton.style.top = "3px";
+        closeButton.style.right = "3px";
+        closeButton.style.overflow = "hidden"
+        closeButton.style.textIndent = -9999
+        // Create Div for img and close button
+        var div = document.createElement("div")
+        div.style.position = "relative";
+        div.style.width = "200px";
+        div.style.height = "200px";
+        div.classList.add("d-inline-flex")
+        div.classList.add("m-1")
         div.appendChild(image)
         div.appendChild(closeButton)
         return div
@@ -99,5 +117,12 @@
         }
         let myFileList = list.files
         input.files = myFileList
+    }
+
+    function preview() {
+        // for cover image
+        var tempFiles = event.target.files
+        var file0 = event.target.files[0]
+        frame.src = URL.createObjectURL(event.target.files[0]);
     }
 </script>

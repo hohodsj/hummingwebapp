@@ -1,20 +1,3 @@
-console.log("From anime")
-
-function preview() {
-    // console.log(`URL:${URL.createObjectURL(event.target.files[0])}`)
-    // console.log(`json:${JSON.stringify(event.target.files)}`)
-    console.log(event.target.files)
-    console.log(event.target.files[0])
-    var tempFiles = event.target.files
-    var file0 = event.target.files[0]
-    frame.src = URL.createObjectURL(event.target.files[0]);
-}
-
-function clearImage() {
-    document.getElementById('formFile').value = null;
-    frame.src = "";
-}
-
 let buttons = document.querySelectorAll('.btn-danger');
 buttons.forEach(button => {
     button.onclick = (event) => confirm(`You are about to delete ${button.value}, do you want to proceed?`);
