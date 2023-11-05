@@ -63,20 +63,23 @@ router.route('/create-collection', isLoggedIn)
     }))
 
 router.post('/reorder/portfolio', isLoggedIn, async(req, res) => {
-    const ordersArr = req.body.orders.split(',');
-    console.log(ordersArr);
-    for(let i = 0; i < ordersArr.length; i++) {
-        const oriOrder = ordersArr[i];
-        if(i != oriOrder) {
-            CollectionSchema.findOneAndUpdate(
-                {order: oriOrder}, 
-                {$set: {order: i}},
-                 function (err, docs) {
+    // use profile name since order can have concurrency issue without using await
+    const collectionOrders = req.body.orders.split(',');
+    // collectionOrders contains list of profile names in the new order
+    console.log(collectionOrders);
+
+    for(let i = 0; i < collectionOrders.length; i++) {
+        const collectionOrder = collectionOrders[i];
+        CollectionSchema.findOneAndUpdate(
+            {collectionName: collectionOrder}, 
+            {$set: {order: i}},
+                function (err, docs) {
                 if(err) {
-                    req.flash('error', `Unable to update order ${oriOrder} to ${i} , Error: ${err}`);
-                } 
-            })
-        }
+                    req.flash('error', `Unable to update ${collectionOrder} , Error: ${err}`);
+                } else{
+                    console.log(`reordered ${collectionOrder} `)
+                }
+        })
     }
     res.redirect(`/admin/portfolio`);
 })

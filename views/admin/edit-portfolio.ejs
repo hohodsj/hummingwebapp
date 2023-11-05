@@ -7,16 +7,16 @@
 <!-- <div class="row row-cols-1 row-cols-md-2 g-4" id="grid-card" data-masonry='{"percentPosition": true,  "itemSelector": ".col" }'> -->
 <div class="row row-cols-1 row-cols-md-2 g-4" id="grid-card" data-masonry='{"percentPosition": true,  "itemSelector": ".col" }'>
     <% for(let collection of collections) { %>
-        <div class="col" data-id="<%= collection.order%>">
+        <div class="col d-flex align-items-center" data-id="<%= collection.order%>"> <!-- data-id is to check order coming from db -->
             <a href="/admin/collection/<%= collection.collectionName%> " title="Click To View Series" >
                 <img src="<%= collection.cover.thumbnailUrl%>" class="card-img-top">
                 <!-- <img src="<%= collection.cover.thumbnailUrl%>"> -->
-                <p><%=collection.collectionName%><br/>
-                    <i class="glyphicon glyphicon-th"></i>
-                </p>
             </a>
+            <span class="overlay-text" style="position: absolute; text-align: center; width: 100%;"><%=collection.collectionName%><br/>
+                <i class="glyphicon glyphicon-th"></i>
+            </span>
             <form action="/admin/collection/<%= collection.collectionName %>?_method=DELETE" method="POST" class="delete_button">
-                <button type="btn" class="btn btn-danger" value="<%= collection.collectionName %>">Delete</button>
+                <button type="btn" class="btn btn-danger" value="<%= collection.collectionName%>" style="display:block; position: absolute; top: 3px; right: 15px; overflow:hidden">Delete</button>
             </form>
         </div>
     <% } %> 
@@ -45,23 +45,22 @@
             group: 'storeOrder',
             
             store: {
-                set: function(order) {
-                    var sortable = order.toArray();
-                    console.log(`sortable: ${sortable}`)
+                set: function(sortable) {
+                    var order = sortable.toArray();
+                    console.log(`order: ${order}`)
                     const orders = document.getElementById('orders');
                     var regExp = /[a-zA-Z]/g;
-                    orders.value = regExp.test(sortable[0]) ? sortable.slice(1) : sortable;
+                    var all = document.querySelectorAll('.col')
+                    var list = Object.keys(order).map(i => all[i].querySelector("span").innerText.trim())
+                    console.log(`list:${list}`)
+                    orders.value = list
                     document.getElementById('save-button').style.display = "inline";
                 }
             },
             onStart: function(event) {
-                console.log(`event:${event.item} json string:${JSON.stringify(event.item)}`)
-                console.log(`parent:${event.item.parentNode.innerHTML}`)
-                // event.item.parentNode.removeAttribute("data-masonry")
                 msnry.destroy();
             },
             onEnd: function(event) {
-                console.log('End')
                 var $grid = document.querySelector('.row');
                 var msnry = new Masonry($grid, {
                     itemSelector: '.col',
