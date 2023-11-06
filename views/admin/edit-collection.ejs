@@ -2,16 +2,21 @@
 <form action="/admin/update/collection/<%=collection._id%>/<%=collection.collectionName%>" id="description-form" method="POST" enctype="multipart/form-data">
     <label for="title">Title</label>
     <input type="text" class="form-control" name="title" value="<%= collection.description.title %>">
+
     <label for="description">Description</label>
     <textarea class="form-control" name="description" rows="3"><%=collection.description.description%></textarea>
+
     <input type="text" id="orders" name="orders" style="display:none">
+    <!-- <input type="text" id="orders" name="orders"> -->
+    
+    <!-- cover image -->
     <div class="mb-3">
         <label for="cover-image" class="form-label">Cover</label>
         <input type="file" class="form-control" name="cover" id="cover-img" onchange="preview()">
         <!-- shows cover image -->
         <img id="frame" src="<%=collection.cover.thumbnailUrl%>" class="img-fluid" />
     </div>
-
+    <!-- images to upload -->
     <div class="upload_box">
         <div class="mb-3">
             <label for="image" class="form-label">Images</label>
@@ -22,10 +27,11 @@
     </div>
 </form>
 
-<div class="row row-cols-1 row-cols-md-2 g-4" data-masonry='{"percentPosition": true,  "itemSelector": ".col" }'>
+<!-- images to display -->
+<div class="row row-cols-1 row-cols-md-2 g-4 mt-0" id="grid-card" data-masonry='{"percentPosition": true,  "itemSelector": ".col" }'>
     <% for(let artwork of collection.artworks) {%> 
         <div class="col" data-id="<%=artwork.order%>">
-            <form action="/admin/artwork/<%= artwork._id%>?_method=DELETE" method="POST" class="delete_button">
+            <form action="/admin/artwork/<%= artwork._id%>?_method=DELETE" method="POST" class="delete_button" style="display:block; position: absolute; top: 3px; right: 15px; overflow:hidden">
                 <button type="btn" class="btn btn-danger" value="<%= artwork.fileName %>"><i class="fa fa-times"></i></button>
             </form>
             <div class="thumbnail">
@@ -35,13 +41,16 @@
     <% } %>
 </div>
 
+
+
 <div>
-    <a href="/admin/portfolio" class="fixed-bottom">
+    <a href="/admin/portfolio" class="position-absolute start-0 mx-5">
     <i class="fas fa-angle-left fa-shake nav-arrow" aria-hidden="true">
     </i>
     </a>
 </div>
 
+<!-- drag and drop image js -->
 <script>
     var imgHashMap = new Map();
     function previews() {
@@ -57,16 +66,12 @@
                 console.log('Existed')
                 continue
             } 
-            console.log(`img:${img}`)
             imgHashMap.set(img.name, img)
             // var html = document.createElement("img")
             // html.src = URL.createObjectURL(img)
             var image = createImage(img)
             uploads.appendChild(image)
         }
-        console.log('imgHashMap')
-        for(var img of imgHashMap)
-            console.log(`img:${img}`)
         
         updateFileList()
     }
@@ -125,4 +130,48 @@
         var file0 = event.target.files[0]
         frame.src = URL.createObjectURL(event.target.files[0]);
     }
+</script>
+
+<!-- sortable js -->
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+<script>
+    Sortable.create(document.getElementById('grid-card'), {
+            group: 'shared',
+            animation: 150,
+            multiDrag: true,
+            selectedClass: 'bg-info',
+            fallbackTolerance: 3,
+            group: 'storeOrder',
+            
+            store: {
+                set: function(sortable) {
+                    var order = sortable.toArray();
+                    console.log(`order: ${order}`)
+                    const orders = document.getElementById('orders');
+                    var regExp = /[a-zA-Z]/g;
+                    var all = document.querySelectorAll('.col')
+                    var list = Object.keys(order).map(i => all[i].querySelector("button").value)
+                    console.log(`list:${list}`)
+                    orders.value = list
+                }
+            },
+            onStart: function(event) {
+                msnry.destroy();
+            },
+            onEnd: function(event) {
+                var $grid = document.querySelector('.row');
+                var msnry = new Masonry($grid, {
+                    itemSelector: '.col',
+                    percentPosition: true
+                });
+        
+                var $images = $grid.querySelectorAll('.card-img-top');
+                $images.forEach(function (el) {
+                    el.addEventListener('load', function () {
+                        console.log("Image is loaded: " + el.getAttribute("src"));
+                        msnry.layout();
+                    });
+                });
+                }
+        }) 
 </script>

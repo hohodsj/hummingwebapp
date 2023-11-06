@@ -104,21 +104,20 @@ router.post('/update/collection/:collectionId/:collectionName', isLoggedIn, uplo
         }
     )
     if(req.body.orders) {
-        const ordersArr = req.body.orders.split(',');
-        console.log(ordersArr);
-        for(let i = 0; i < ordersArr.length; i++) {
-            const oriOrder = ordersArr[i];
-            if(i != oriOrder) {
-                console.log(`update origin order ${oriOrder} to ${i}`);
-                ArtWorkSchema.findOneAndUpdate(
-                    {collectionSchema: collectionId, order: oriOrder}, 
-                    {$set: {order: i}},
-                    function (err, docs) {
-                    if(err) {
-                        req.flash('error', `Unable to update order ${oriOrder} to ${i} , Error: ${err}`);
-                    } 
-                })
-            }
+        // uses image file name inside of delete button
+        const imgFilesOrderArr = req.body.orders.split(',');
+        console.log(imgFilesOrderArr);
+        for(let i = 0; i < imgFilesOrderArr.length; i++) {
+            const imgFile = imgFilesOrderArr[i];
+            console.log(`update origin order ${imgFile} to ${i}`);
+            ArtWorkSchema.findOneAndUpdate(
+                {collectionSchema: collectionId, fileName: imgFile}, 
+                {$set: {order: i}},
+                function (err, docs) {
+                if(err) {
+                    req.flash('error', `Unable to update file ${imgFile} to order ${i} , Error: ${err}`);
+                } 
+            })
         }
     }
     if(req.files.cover) {
@@ -252,7 +251,7 @@ router.delete('/artwork/:artworkId', isLoggedIn, async(req, res) => {
     // const count = await CollectionSchema.findOne({_id: collectionId}).populate('artworks').countDocuments({});
     const count = await ArtWorkSchema.countDocuments({collectionSchema: collectionId}); // count cover, remove 1 img same length as expected
     for(let i = order + 1; i < count; i++) {
-        const updatedOrder = i - 1;
+        const updatedOrder = i - 1; // shift everything after to a position before
         ArtWorkSchema.findOneAndUpdate(
             {collectionSchema: collectionId, order: i},
             {$set: {order: updatedOrder}},
