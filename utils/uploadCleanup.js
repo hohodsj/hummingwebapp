@@ -7,7 +7,11 @@ module.exports.uploadCleanup = () => fs.readdir(directory, (err, files) => {
   if (err) throw err;
   for (const file of files) {
     fs.unlink(path.join(directory, file), err => {
-      if (err) throw err;
+      if (err) {
+        console.log(err)
+        return;
+        // throw err;
+      }
     });
   }
 });

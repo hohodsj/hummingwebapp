@@ -120,7 +120,6 @@ a:hover {
 /*navbar buttons CV Work Contact Attributes*/
 
 
-
 /*Hover with text*/
 .internal-link-style{
   visibility: hidden;
@@ -316,6 +315,11 @@ a:hover {
 .preview{
   width: 200px;
   height: 200px;
+}
+
+/* Popup */
+.modal-backdrop{
+  z-index: -1;
 }
 
 /*Navbar collapse at bigger dimension*/

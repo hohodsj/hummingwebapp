@@ -1,10 +1,10 @@
 <% layout('layouts/boilerplate') %> 
 <form action="/admin/update/collection/<%=collection._id%>/<%=collection.collectionName%>" id="description-form" method="POST" enctype="multipart/form-data">
     <label for="title">Title</label>
-    <input type="text" class="form-control" name="title" value="<%= collection.description.title %>">
+    <input type="text" class="form-control" name="title" value="<%= collection?.description?.title %>">
 
     <label for="description">Description</label>
-    <textarea class="form-control" name="description" rows="3"><%=collection.description.description%></textarea>
+    <textarea class="form-control" name="description" rows="3"><%= collection?.description?.description %></textarea>
 
     <input type="text" id="orders" name="orders" style="display:none">
     <!-- <input type="text" id="orders" name="orders"> -->
@@ -14,7 +14,7 @@
         <label for="cover-image" class="form-label">Cover</label>
         <input type="file" class="form-control" name="cover" id="cover-img" onchange="preview()">
         <!-- shows cover image -->
-        <img id="frame" src="<%=collection.cover.thumbnailUrl%>" class="img-fluid" />
+        <img id="frame" src="<%=collection?.cover?.thumbnailUrl%>" class="img-fluid" />
     </div>
     <!-- images to upload -->
     <div class="upload_box">
@@ -29,7 +29,7 @@
 
 <!-- images to display -->
 <div class="row row-cols-1 row-cols-md-2 g-4 mt-0" id="grid-card" data-masonry='{"percentPosition": true,  "itemSelector": ".col" }'>
-    <% for(let artwork of collection.artworks) {%> 
+    <% for(let artwork of collection?.artworks) {%> 
         <div class="col" data-id="<%=artwork.order%>">
             <form action="/admin/artwork/<%= artwork._id%>?_method=DELETE" method="POST" class="delete_button" style="display:block; position: absolute; top: 3px; right: 15px; overflow:hidden">
                 <button type="btn" class="btn btn-danger" value="<%= artwork.fileName %>"><i class="fa fa-times"></i></button>

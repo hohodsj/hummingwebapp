@@ -76,9 +76,14 @@ module.exports.saveFile = async(fileName, filePath, fileMimeType, folderName) =>
 }
 
 module.exports.deleteFile = async(id) => {
-    return drive.files.delete({
-        fileId: id
-    });
+    try{
+        return drive.files.delete({
+            fileId: id
+        });
+    } catch(error) {
+        console.log(`Error deleting ${id}`)
+    }
+    
 }
 
 module.exports.downloadFile = (filename, id, type) => {

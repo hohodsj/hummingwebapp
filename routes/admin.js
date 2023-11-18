@@ -14,6 +14,8 @@ const {zip} = require('../utils/zip');
 const {uploadCleanup} = require('../utils/uploadCleanup');
 const {createArtwork, createDescription, createCollection} = require('../factory/factory');
 const passport = require('passport');
+const {generateImageAsync} = require('../utils/coverImgGenerator')
+
 
 router.get('/portfolio', isLoggedIn, async(req, res) => {
     const collections = await CollectionSchema.find({}).populate('cover').sort({order:1});
@@ -27,8 +29,8 @@ router.route('/create-collection', isLoggedIn)
     })
     .post(upload.fields([{name:'cover'}, {name: 'image'}]), isCollectionExists, createUploadFolder, catchAsync( async (req, res) => {
         let artworks = [];
-        if(!req.files.cover || !req.files.image) {
-            req.flash('error', `Cover and images cannot be empty`);
+        if(!req.files.cover ) {
+            req.flash('error', `Cover image cannot be empty`);
             // res.redirect('create-collection')
             res.render('admin/create-collection', {input:{collectionName:req.body.collectionName, description:req.body.description}, error:req.flash("error")});
         } else {
@@ -61,6 +63,25 @@ router.route('/create-collection', isLoggedIn)
             res.redirect('./portfolio');
         }
     }))
+
+    router.post('/create-collection2', isLoggedIn, async(req, res) => {
+        
+        const file = await generateImageAsync(555, 370, 100);
+        const [thumbnailId, imageId, isHorizontal] = await googleDriveUtil.uploadImageToDrive(file.data, 'jpg');
+        const collectionName = req.body.collectionName;
+        const description = req.body.description;
+        console.log(collectionName)
+        console.log(description)
+        const descriptionSchema = createDescription(collectionName, description, 'Collection');
+        descriptionSchema.save();
+        const cover = createArtwork(thumbnailId, imageId, "coverNamePlaceHolder", isHorizontal, -1); // put random image here
+        await cover.save();
+        const collectionCount = await CollectionSchema.countDocuments({});
+        const collectionSchema = createCollection(collectionName, cover, collectionCount, [], descriptionSchema);
+        await collectionSchema.save();
+        const collection = await CollectionSchema.findOne({collectionName: collectionName}).populate({path: 'artworks'}).populate('description').populate({path: 'cover'});
+        res.render(`admin/edit-collection`, {collection, admin:true});
+    })
 
 router.post('/reorder/portfolio', isLoggedIn, async(req, res) => {
     // use profile name since order can have concurrency issue without using await
@@ -121,36 +142,45 @@ router.post('/update/collection/:collectionId/:collectionName', isLoggedIn, uplo
         }
     }
     if(req.files.cover) {
-        const file = req.files.cover[0];
-        const [thumbnailId, imageId, isHorizontal] = await googleDriveUtil.uploadImageToDrive(file.buffer, file.originalname.split('.').pop());
-        const cover = createArtwork(thumbnailId, imageId, file.originalname, isHorizontal, -1, collection);
-        await cover.save();
-        await googleDriveUtil.deleteImageWithIds([collection.cover.thumbnailId, collection.cover.imageId]);
-        ArtWorkSchema.remove({_id: collection.cover._id});
-        collection.cover = cover;
-        await collection.save();
+        try{
+            const file = req.files.cover[0];
+            const [thumbnailId, imageId, isHorizontal] = await googleDriveUtil.uploadImageToDrive(file.buffer, file.originalname.split('.').pop());
+            const cover = createArtwork(thumbnailId, imageId, file.originalname, isHorizontal, -1, collection);
+            await cover.save();
+            await googleDriveUtil.deleteImageWithIds([collection.cover.thumbnailId, collection.cover.imageId]);
+            ArtWorkSchema.remove({_id: collection.cover._id});
+            collection.cover = cover;
+            await collection.save();
+        }catch(e) {
+            console.log(`Error updating cover file ${file.originalname}`)
+        }
+        
     }
     
     if(req.files.image) {
         for(let i = 0; i < req.files.image.length; i++) {
-            const file = req.files.image[i];
-            const [thumbnailId, imageId, isHorizontal] = await googleDriveUtil.uploadImageToDrive(file.buffer, file.originalname.split('.').pop());
-            // const collectionCount = await CollectionSchema.countDocuments({});
-            const artworksCount = await ArtWorkSchema.countDocuments({collectionSchema: collectionId});
-            const actualOrder = artworksCount - 1;
-            const artwork = createArtwork(thumbnailId, imageId, file.originalname, isHorizontal, actualOrder, collection);
-            await artwork.save();
-            CollectionSchema.updateOne(
-                {_id: collectionId},
-                {$push: {artworks: artwork}},
-                function (err, docs) {
-                    if(err) {
-                        console.log(err)
-                    } else {
-                        console.log(docs)
+            try{
+                const file = req?.files?.image[i];
+                const [thumbnailId, imageId, isHorizontal] = await googleDriveUtil.uploadImageToDrive(file.buffer, file.originalname.split('.').pop());
+                // const collectionCount = await CollectionSchema.countDocuments({});
+                const artworksCount = await ArtWorkSchema.countDocuments({collectionSchema: collectionId});
+                const actualOrder = artworksCount - 1;
+                const artwork = createArtwork(thumbnailId, imageId, file.originalname, isHorizontal, actualOrder, collection);
+                await artwork.save();
+                CollectionSchema.updateOne(
+                    {_id: collectionId},
+                    {$push: {artworks: artwork}},
+                    function (err, docs) {
+                        if(err) {
+                            console.log(err)
+                        } else {
+                            console.log(docs)
+                        }
                     }
-                }
-            );
+                );
+            } catch(error) {
+                console.log(`Error when updating image: ${file.originalname} error:${error} `)
+            }
         }
     }
     uploadCleanup();
@@ -198,22 +228,6 @@ router.route('/contact', isLoggedIn)
         res.redirect('/admin/contact');
     })
 
-    /*
-router.get('/:collection', isLoggedIn, async(req, res) => {
-    // res.send(`Collection: ${req.params.collection}`);
-    const collectionName = req.params.collection;
-    const options = {sort: [{'order': 'asc'}]};
-    const collection = await CollectionSchema.findOne({collectionName: collectionName}).populate({path: 'artworks', options}).populate('description');
-    res.render('admin/edit-collection', {collection, admin:true})
-})
-
-router.delete('/:collection', isLoggedIn, async(req, res) => {
-    const {collection} = req.params;
-    const resp = await removeCollection(collection);
-    req.flash(resp[0], resp[1]);
-    res.redirect('./portfolio');
-})
-*/
 router.route('/collection/:collectionName', isLoggedIn)
     .get(async(req, res) => {
         const collectionName = req.params.collectionName;
