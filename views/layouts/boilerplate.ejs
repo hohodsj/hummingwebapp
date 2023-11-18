@@ -61,27 +61,27 @@
         
         <!-- <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script> -->
         <script type="text/javascript" src="/javascripts/anime.js"></script>
-        <!-- <script>
-            var msnry = new Masonry('.row', {
-                itemSelector: '.col',
-                percentPosition: true
-            });
-            setTimeout(function () {
-                msnry.layout();
-            }, 100);
+        <script>
+            // var msnry = new Masonry('.row', {
+            //     itemSelector: '.col',
+            //     percentPosition: true
+            // });
+            // setTimeout(function () {
+            //     msnry.layout();
+            // }, 100);
 
-            setTimeout(function () {
-                msnry.layout();
-            }, 300);
+            // setTimeout(function () {
+            //     msnry.layout();
+            // }, 300);
 
-            setTimeout(function () {
-                msnry.layout();
-            }, 1000);
+            // setTimeout(function () {
+            //     msnry.layout();
+            // }, 1000);
 
-            setTimeout(function () {
-                msnry.layout();
-            }, 5000);
-        </script> -->
+            // setTimeout(function () {
+            //     msnry.layout();
+            // }, 5000);
+        </script>
         <script>
             var $grid = document.querySelector('.row');
             var msnry = new Masonry($grid, {
@@ -96,32 +96,10 @@
                     msnry.layout();
                 });
             });
+            setTimeout(function () {
+                msnry.layout();
+            }, 1000);
         </script>
-        <!-- <script>
-            Sortable.create(document.getElementById('grid-card'), {
-                    group: 'shared',
-                    animation: 150,
-                    multiDrag: true,
-                    selectedClass: 'bg-info',
-                    fallbackTolerance: 3,
-                    group: 'storeOrder',
-                    
-                    store: {
-                        set: function(order) {
-                            var sortable = order.toArray();
-                            console.log(`sortable: ${sortable}`)
-                            const orders = document.getElementById('orders');
-                            var regExp = /[a-zA-Z]/g;
-                            orders.value = regExp.test(sortable[0]) ? sortable.slice(1) : sortable;
-                            document.getElementById('save-button').style.display = "inline";
-                        }
-                    },
-                    onStart: function(event) {
-                        console.log(`event:${event.item} json string:${JSON.stringify(event.item)}`)
-                        console.log(`parent:${event.item.parentNode.innerHTML}`)
-                    }
-                }) 
-        </script> -->
     </body>
     <%-include('../partials/footer') %> 
 </html>

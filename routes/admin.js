@@ -23,65 +23,24 @@ router.get('/portfolio', isLoggedIn, async(req, res) => {
     res.render('admin/edit-portfolio', {collections, admin:true, success:req.flash("success")});
 });
 
-router.route('/create-collection', isLoggedIn)
-    .get(async(req, res) => {
-        res.render('admin/create-collection', {input:null});
-    })
-    .post(upload.fields([{name:'cover'}, {name: 'image'}]), isCollectionExists, createUploadFolder, catchAsync( async (req, res) => {
-        let artworks = [];
-        if(!req.files.cover ) {
-            req.flash('error', `Cover image cannot be empty`);
-            // res.redirect('create-collection')
-            res.render('admin/create-collection', {input:{collectionName:req.body.collectionName, description:req.body.description}, error:req.flash("error")});
-        } else {
-            const collectionName = req.body.collectionName;
-            const file = req.files.cover[0];
-            const [thumbnailId, imageId, isHorizontal] = await googleDriveUtil.uploadImageToDrive(file.buffer, file.originalname.split('.').pop());
-            const cover = createArtwork(thumbnailId, imageId, file.originalname, isHorizontal, -1);
-            await cover.save();
-
-            for(let i = 0; i < req.files.image.length; i++) {
-                const file = req.files.image[i];
-                const [thumbnailId, imageId, isHorizontal] = await googleDriveUtil.uploadImageToDrive(file.buffer, file.originalname.split('.').pop());
-                const artwork = createArtwork(thumbnailId, imageId, file.originalname, isHorizontal, i);
-                await artwork.save();
-                artworks.push(artwork);
-            }
-            const description = createDescription(collectionName, req.body.description, 'Collection');
-            description.save();
-            const collectionCount = await CollectionSchema.countDocuments({});
-            const collection = createCollection(collectionName, cover, collectionCount, artworks, description);
-            artworks.push(cover);
-
-            artworks.forEach(artwork => {
-                artwork.collectionSchema = collection;
-                artwork.save();
-            })
-            await collection.save();
-            uploadCleanup();
-            req.flash('success', 'Successfully upload');
-            res.redirect('./portfolio');
-        }
-    }))
-
-    router.post('/create-collection2', isLoggedIn, async(req, res) => {
-        
-        const file = await generateImageAsync(555, 370, 100);
-        const [thumbnailId, imageId, isHorizontal] = await googleDriveUtil.uploadImageToDrive(file.data, 'jpg');
-        const collectionName = req.body.collectionName;
-        const description = req.body.description;
-        console.log(collectionName)
-        console.log(description)
-        const descriptionSchema = createDescription(collectionName, description, 'Collection');
-        descriptionSchema.save();
-        const cover = createArtwork(thumbnailId, imageId, "coverNamePlaceHolder", isHorizontal, -1); // put random image here
-        await cover.save();
-        const collectionCount = await CollectionSchema.countDocuments({});
-        const collectionSchema = createCollection(collectionName, cover, collectionCount, [], descriptionSchema);
-        await collectionSchema.save();
-        const collection = await CollectionSchema.findOne({collectionName: collectionName}).populate({path: 'artworks'}).populate('description').populate({path: 'cover'});
-        res.render(`admin/edit-collection`, {collection, admin:true});
-    })
+router.post('/create-collection', isLoggedIn, async(req, res) => {
+    
+    const file = await generateImageAsync(555, 370, 100);
+    const [thumbnailId, imageId, isHorizontal] = await googleDriveUtil.uploadImageToDrive(file.data, 'jpg');
+    const collectionName = req.body.collectionName;
+    const description = req.body.description;
+    console.log(collectionName)
+    console.log(description)
+    const descriptionSchema = createDescription(collectionName, description, 'Collection');
+    descriptionSchema.save();
+    const cover = createArtwork(thumbnailId, imageId, "coverNamePlaceHolder", isHorizontal, -1); // put random image here
+    await cover.save();
+    const collectionCount = await CollectionSchema.countDocuments({});
+    const collectionSchema = createCollection(collectionName, cover, collectionCount, [], descriptionSchema);
+    await collectionSchema.save();
+    const collection = await CollectionSchema.findOne({collectionName: collectionName}).populate({path: 'artworks'}).populate('description').populate({path: 'cover'});
+    res.render(`admin/edit-collection`, {collection, admin:true});
+})
 
 router.post('/reorder/portfolio', isLoggedIn, async(req, res) => {
     // use profile name since order can have concurrency issue without using await
