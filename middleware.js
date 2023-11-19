@@ -11,11 +11,9 @@ module.exports.isLoggedIn = (req, res, next) => {
 }
 
 module.exports.createUploadFolder = (req, res, next) => {
-    fs.access('./uploads', (err) => {
-        if(err) {
-            fs.mkdir('./uploads');
-        }
-    })
+    if (!fs.existsSync('./uploads')) {
+        fs.mkdirSync('./uploads');
+    }
     next();
 }
 

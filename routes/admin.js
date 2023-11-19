@@ -23,8 +23,7 @@ router.get('/portfolio', isLoggedIn, async(req, res) => {
     res.render('admin/edit-portfolio', {collections, admin:true, success:req.flash("success")});
 });
 
-router.post('/create-collection', isLoggedIn, async(req, res) => {
-    
+router.post('/create-collection', isLoggedIn, createUploadFolder, async(req, res) => {
     const file = await generateImageAsync(555, 370, 100);
     const [thumbnailId, imageId, isHorizontal] = await googleDriveUtil.uploadImageToDrive(file.data, 'jpg');
     const collectionName = req.body.collectionName;
