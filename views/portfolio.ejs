@@ -6,10 +6,20 @@
         <div class="col col-12 col-md-6 p-3">
             <a href="/collection/<%= collection.collectionName%> " title="Click To View Series">
                 <img src="<%= collection.src%>" class="img-thumbnail p-0" alt="Humming Sang's Collection - <%= collection.collectionName%>">
-                <div class="overlay">
-                    <p class="overlay-text"><%=collection.collectionName%> <br> <i class="fa-solid fa-grip"></i></p> 
-                </div>
+                <% if(isMobile) {%>
+                    <p class="overlay-text" style="position: absolute; text-align: center; width: 100%;"><%=collection.collectionName%><br/>
+                        <i class="fa-solid fa-grip"></i>
+                    </p>
+                <% } else {%>
+                    <div class="overlay">
+                        <p class="overlay-text"><%=collection.collectionName%> <br> <i class="fa-solid fa-grip"></i></p> 
+                    </div>
+                <% } %>
             </a>
         </div>
     <% } %>
 </div>
+
+<script>
+    console.log(`mobileCheck() ${mobileCheck()}`)
+</script>

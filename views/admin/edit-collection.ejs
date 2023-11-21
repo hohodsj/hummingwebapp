@@ -12,7 +12,7 @@
     <!-- cover image -->
     <div class="mb-3">
         <label for="cover-image" class="form-label">Cover</label>
-        <input type="file" class="form-control" name="cover" id="cover-img" onchange="preview()">
+        <input type="file" accept=".png, .jpg, .jpeg" class="form-control" name="cover" id="cover-img" onchange="preview()">
         <!-- shows cover image -->
         <img id="frame" src="<%=collection?.cover?.thumbnailUrl%>" class="img-fluid" />
     </div>
@@ -20,7 +20,7 @@
     <div class="upload_box">
         <div class="mb-3">
             <label for="image" class="form-label">Images</label>
-            <input type="file" class="form-control upload-art-works" name="image" id="image" onchange="previews()" multiple>
+            <input type="file" accept=".png, .jpg, .jpeg" class="form-control upload-art-works" name="image" id="image" onchange="previews()" multiple>
         </div>
         <div id="upload-group"></div>
         <button type="btn" class="btn btn-success">Save</button>

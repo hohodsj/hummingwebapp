@@ -21,6 +21,7 @@ const {downloadImages} = require('./utils/googleDriveUtil');
 const fs = require("fs")
 const {periodicRemove} = require('./utils/deleteUtils')
 const cron = require('node-cron')
+const useragent = require('express-useragent')
 
 const adminRoutes = require('./routes/admin');
 
@@ -40,6 +41,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.urlencoded({extended:true}));
 app.use(bodyParser.text());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(useragent.express())
 app.use(methodOverride('_method'));
 
 const secret = process.env.SECRET || 'ThisSecretOnlyWorksInDevEnv';
@@ -101,6 +103,7 @@ app.use((req, res, next) => {
 });
 
 app.get('/', catchAsync(async (req, res) => {
+    const isMobile = req.useragent['isMobile']
     const collections = await CollectionSchema.find({}).populate('cover').sort({order:1});
     // save images to local
     const imageInfos = collections.map(collection => ({id: collection.cover.thumbnailId, type:collection.cover.fileType}))
@@ -114,7 +117,7 @@ app.get('/', catchAsync(async (req, res) => {
         isHorizontal: c.cover.isHorizontal,
         src: fs.existsSync(`${path}/${c.cover.thumbnailId}.${c.cover.fileType}`) ? `/images/${c.cover.thumbnailId}.${c.cover.fileType}` : c.cover.thumbnailUrl
     }))
-    res.render('portfolio', {formattedCollections});
+    res.render('portfolio', {formattedCollections, isMobile});
 }));
 
 app.get('/about', async (req, res) => {
