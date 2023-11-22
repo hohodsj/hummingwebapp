@@ -104,7 +104,7 @@ app.use((req, res, next) => {
 
 app.get('/', catchAsync(async (req, res) => {
     const isMobile = req.useragent['isMobile']
-    const collections = await CollectionSchema.find({}).populate('cover').sort({order:1});
+    const collections = await CollectionSchema.find({}).populate('cover').sort({order:-1});
     // save images to local
     const imageInfos = collections.map(collection => ({id: collection.cover.thumbnailId, type:collection.cover.fileType}))
     // background process of downloading images

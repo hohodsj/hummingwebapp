@@ -18,12 +18,12 @@ const {generateImageAsync} = require('../utils/coverImgGenerator')
 
 
 router.get('/portfolio', isLoggedIn, async(req, res) => {
-    const collections = await CollectionSchema.find({}).populate('cover').sort({order:1});
+    const collections = await CollectionSchema.find({}).populate('cover').sort({order:-1});
     req.flash('success', 'You are now Admin')
     res.render('admin/edit-portfolio', {collections, admin:true, success:req.flash("success")});
 });
 
-router.post('/create-collection', isLoggedIn, createUploadFolder, async(req, res) => {
+router.post('/create-collection', isLoggedIn, createUploadFolder, isCollectionExists, async(req, res) => {
     const file = await generateImageAsync(555, 370, 100);
     const [thumbnailId, imageId, isHorizontal] = await googleDriveUtil.uploadImageToDrive(file.data, 'jpg');
     const collectionName = req.body.collectionName;
