@@ -7,11 +7,11 @@
 </div>
 
 
-<div class="row">
+<div class="row row-cols-1 row-cols-md-2 g-4 mt-0">
 <% for(let artwork of formattedArtWork) {%> 
-    <div class="col-lg-6 col-md-6 col-sm-12">
+    <div class="col">
         <div class="thumbnail">
-            <a data-fancybox="gallery" href="<%= artwork.thumbnailSrc%>" title="Click To Enlarge"><img src="<%= artwork.imageSrc%>" alt="By Humming Sang">
+            <a data-fancybox="gallery" href="<%= artwork.thumbnailSrc%>" title="Click To Enlarge"><img src="<%= artwork.imageSrc%>" class="img-thumbnail p-0" alt="By Humming Sang">
                 <div class="overlay-pic"></div>
             </a>
         </div>

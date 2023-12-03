@@ -1,31 +1,32 @@
 <% layout('layouts/boilerplate') %> 
 <p>You must be login to see this TODO: Change this to flash later and add edit boiler plate</p>
-<div class="row" id="grid-card">
 <!-- Hover with text and link example -->
-    <p>Showing art works</p>
+<!-- https://www.youtube.com/watch?v=eTrpkJVwmaw&ab_channel=SonarSystems -->
+<!-- https://github.com/SonarSystems/Bootstrap-5-Tutorial-Source-Code/blob/132d128161876b295fc1f4e6ce402ef14fc9d246/Code/%5B3%5D%20Components/Card%20Masonry%20Layout/index.html#L16 -->
+<p>Showing art works</p>
+<!-- <div class="row row-cols-1 row-cols-md-2 g-4" id="grid-card" data-masonry='{"percentPosition": true,  "itemSelector": ".col" }'> -->
+<div class="row row-cols-1 row-cols-md-2 g-4" id="grid-card" data-masonry='{"percentPosition": true,  "itemSelector": ".col" }'>
     <% for(let collection of collections) { %>
-        <div class="col-md-6" data-id="<%= collection.order%>">
+        <div class="col d-flex align-items-center" data-id="<%= collection.order%>"> <!-- data-id is to check order coming from db -->
+            <a href="/admin/collection/<%= collection.collectionName%> " title="Click To View Series" >
+                <img src="<%= collection.cover.thumbnailUrl%>" class="card-img-top">
+                <!-- <img src="<%= collection.cover.thumbnailUrl%>"> -->
+            </a>
+            <span class="overlay-text" style="position: absolute; text-align: center; width: 100%;"><%=collection.collectionName%><br/>
+                <i class="glyphicon glyphicon-th"></i>
+            </span>
             <form action="/admin/collection/<%= collection.collectionName %>?_method=DELETE" method="POST" class="delete_button">
-                <button type="btn" class="btn btn-danger" value="<%= collection.collectionName %>"><i class="fa fa-times"></i></button>
+                <button type="btn" class="btn btn-danger" value="<%= collection.collectionName%>" style="display:block; position: absolute; top: 3px; right: 15px; overflow:hidden"><i class="fa fa-times"></i></button>
             </form>
-            <div class="thumbnail"> 
-                <img src="<%= collection.cover.thumbnailUrl%>">
-                <!-- <div class="overlay"> -->
-                    <a href="/admin/collection/<%= collection.collectionName%> " class="work-link-edit"  title="Click To View Series">
-                        <div class="text" style="width: 70%">
-                            <p class=<%= collection.cover.isHorizontal ? "work-link" : "work-link-verti" %>><%=collection.collectionName%><br/>
-                                <i class="glyphicon glyphicon-th"></i>
-                            </p>
-                        </div>
-                    </a>
-                <!-- </div> -->
-            </div>
         </div>
     <% } %> 
 </div>
-<form action="/admin/create-collection" class="fixed-bottom" method="GET">
+
+
+<!-- <form action="/admin/create-collection" class="fixed-bottom" method="GET">
     <button class="btn btn-success">+</button>
-</form>
+</form> -->
+
 <!-- <form action="/admin/all?_method=DELETE" method="POST" class="position-absolute bottom-0 start-50 translate-middle-x">
     <button type="btn" class="btn btn-danger">Delete All</button>
 </form> -->
@@ -33,9 +34,77 @@
     <input type="text" id="orders" name="orders" style="display:none">
     <button type="btn" class="btn btn-success" style="display:none" id="save-button">Save</button>
 </form>
+
+<button type="button" class="btn btn-success translate-middle-y fixed-top" data-bs-toggle="modal" data-bs-target="#exampleModal" data-bs-whatever="@mdo" style="width:50px; top: 50%;">+</button>
+
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Create Collection</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form action="/admin/create-collection" method="POST">
+          <div class="mb-3">
+            <label class="form-label" for="collectionName">Collection Name</label>
+            <input class="form-control" type="text" name="collectionName" value="">
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="description">Description</label>
+            <textarea class="form-control" name="description" id="description"></textarea>
+          </div>
+          <!-- <div class="modal-footer"> -->
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button class="btn btn-primary">Create</button>
+          <!-- </div> -->
+        </form>
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 <script>
-    let buttons = document.querySelectorAll('.btn-danger');
-    buttons.forEach(button => {
-        button.onclick = (event) => confirm(`You are about to delete the collection ${button.value}, do you want to proceed?`);
-    })
+    Sortable.create(document.getElementById('grid-card'), {
+            group: 'shared',
+            animation: 150,
+            multiDrag: true,
+            selectedClass: 'bg-info',
+            fallbackTolerance: 3,
+            group: 'storeOrder',
+            
+            store: {
+                set: function(sortable) {
+                    var order = sortable.toArray();
+                    console.log(`order: ${order}`)
+                    const orders = document.getElementById('orders');
+                    var regExp = /[a-zA-Z]/g;
+                    var all = document.querySelectorAll('.col')
+                    var list = Object.keys(order).map(i => all[i].querySelector("span").innerText.trim())
+                    console.log(`list:${list}`)
+                    orders.value = list
+                    document.getElementById('save-button').style.display = "inline";
+                }
+            },
+            onStart: function(event) {
+                msnry.destroy();
+            },
+            onEnd: function(event) {
+                var $grid = document.querySelector('.row');
+                var msnry = new Masonry($grid, {
+                    itemSelector: '.col',
+                    percentPosition: true
+                });
+        
+                var $images = $grid.querySelectorAll('.card-img-top');
+                $images.forEach(function (el) {
+                    el.addEventListener('load', function () {
+                        console.log("Image is loaded: " + el.getAttribute("src"));
+                        msnry.layout();
+                    });
+                });
+                }
+        }) 
 </script>

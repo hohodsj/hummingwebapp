@@ -11,11 +11,9 @@ module.exports.isLoggedIn = (req, res, next) => {
 }
 
 module.exports.createUploadFolder = (req, res, next) => {
-    fs.access('./uploads', (err) => {
-        if(err) {
-            fs.mkdir('./uploads');
-        }
-    })
+    if (!fs.existsSync('./uploads')) {
+        fs.mkdirSync('./uploads');
+    }
     next();
 }
 
@@ -32,8 +30,8 @@ module.exports.isCollectionExists = async (req, res, next) => {
         }
         if(count > 0) {
             req.flash('error', `Collection: ${req.body.collectionName} already exists`);
-            res.render('admin/create-collection', {input:req.body, error: req.flash('error')});
-            // return res.status(204).send();
+            res.redirect('/admin/portfolio')
+            // res.render('admin/edit-portfolio', {error: req.flash('error')});
         }
     })
 }
