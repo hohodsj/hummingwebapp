@@ -6,11 +6,10 @@
 <p>Showing art works</p>
 <!-- <div class="row row-cols-1 row-cols-md-2 g-4" id="grid-card" data-masonry='{"percentPosition": true,  "itemSelector": ".col" }'> -->
 <div class="row row-cols-1 row-cols-md-2 g-4" id="grid-card" data-masonry='{"percentPosition": true,  "itemSelector": ".col" }'>
-    <% for(let collection of collections) { %>
+    <% for(let collection of formattedCollections) { %>
         <div class="col d-flex align-items-center" data-id="<%= collection.order%>"> <!-- data-id is to check order coming from db -->
             <a href="/admin/collection/<%= collection.collectionName%> " title="Click To View Series" >
-                <img src="<%= collection.cover.thumbnailUrl%>" class="card-img-top">
-                <!-- <img src="<%= collection.cover.thumbnailUrl%>"> -->
+                <img src="<%= collection.src%>" class="card-img-top">
             </a>
             <span class="overlay-text" style="position: absolute; text-align: center; width: 100%;"><%=collection.collectionName%><br/>
                 <i class="glyphicon glyphicon-th"></i>
