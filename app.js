@@ -108,14 +108,14 @@ app.get('/', catchAsync(async (req, res) => {
     // save images to local
     const imageInfos = collections.map(collection => ({id: collection.cover.thumbnailId, type:collection.cover.fileType}))
     // background process of downloading images
-    downloadImages(imageInfos)
+    await downloadImages(imageInfos)
 
     // dynamically selecting if select google drive url or from disk
     const path = './public/images'
     const formattedCollections = collections.map(c => ({
         collectionName : c.collectionName,
         isHorizontal: c.cover.isHorizontal,
-        src: fs.existsSync(`${path}/${c.cover.thumbnailId}.${c.cover.fileType}`) ? `/images/${c.cover.thumbnailId}.${c.cover.fileType}` : c.cover.thumbnailUrl
+        src: `/images/${c.cover.thumbnailId}.${c.cover.fileType}`
     }))
     res.render('portfolio', {formattedCollections, isMobile});
 }));
@@ -161,13 +161,13 @@ app.get('/collection/:collectionName', catchAsync(async (req, res) => {
     const thumbnailImageInfos = collection.artworks.map(artwork => ({id: artwork.thumbnailId, type:artwork.fileType}))
     const actualImageInfos = collection.artworks.map(artwork => ({id: artwork.imageId, type:artwork.fileType}))
     // download in background
-    downloadImages([...thumbnailImageInfos, ...actualImageInfos])
+    await downloadImages([...thumbnailImageInfos, ...actualImageInfos])
      // dynamically selecting if select google drive url or from disk
     const path = './public/images'
     const description = {title: collection.description.title, description: collection.description.description}
     const formattedArtWork = collection.artworks.map(c => ({
-        thumbnailSrc: fs.existsSync(`${path}/${c.thumbnailId}.${c.fileType}`) ? `/images/${c.thumbnailId}.${c.fileType}` : c.thumbnailUrl,
-        imageSrc: fs.existsSync(`${path}/${c.imageId}.${c.fileType}`) ? `/images/${c.imageId}.${c.fileType}` : c.imageUrl
+        thumbnailSrc: `/images/${c.thumbnailId}.${c.fileType}`,
+        imageSrc: `/images/${c.imageId}.${c.fileType}`
     }))
     res.render('collection', {description, formattedArtWork});
 }));
