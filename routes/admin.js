@@ -52,6 +52,19 @@ router.post('/create-collection', isLoggedIn, createUploadFolder, isCollectionEx
     const collectionSchema = createCollection(collectionName, cover, collectionCount, [], descriptionSchema);
     await collectionSchema.save();
     const collection = await CollectionSchema.findOne({collectionName: collectionName}).populate({path: 'artworks'}).populate('description').populate({path: 'cover'});
+    const thumbnailImageInfos = collection.artworks.map(artwork => ({id: artwork.thumbnailId, type:artwork.fileType}))
+    const actualImageInfos = collection.artworks.map(artwork => ({id: artwork.imageId, type:artwork.fileType}))
+    const coverImageInfos = [{id:collection.cover.thumbnailId, type: collection.cover.fileType}]
+    // download in background
+    await downloadImages([...thumbnailImageInfos, ...actualImageInfos, ...coverImageInfos])
+    const formattedArtWork = collection.artworks.map(c => ({
+        ...c,
+        thumbnailSrc: `/images/${c.thumbnailId}.${c.fileType}`,
+        imageSrc: `/images/${c.imageId}.${c.fileType}`
+    }))
+    collection.artworks = formattedArtWork;
+    collection.cover.thumbnailSrc = `/images/${collection.cover.thumbnailId}.${collection.cover.fileType}`
+    
     res.render(`admin/edit-collection`, {collection, admin:true});
 })
 
@@ -208,6 +221,9 @@ router.route('/collection/:collectionName', isLoggedIn)
         // const artworks = collection.artworks;
         const thumbnailImageInfos = collection.artworks.map(artwork => ({id: artwork.thumbnailId, type:artwork.fileType}))
         const actualImageInfos = collection.artworks.map(artwork => ({id: artwork.imageId, type:artwork.fileType}))
+        const coverInfos = [
+            {id: collection.cover.thumbnailId, type:collection.cover.fileType}, 
+            {id: collection.cover.imageId, type:collection.cover.fileType}]
         // download in background
         await downloadImages([...thumbnailImageInfos, ...actualImageInfos])
         // dynamically selecting if select google drive url or from disk
@@ -218,8 +234,10 @@ router.route('/collection/:collectionName', isLoggedIn)
             thumbnailSrc: `/images/${c.thumbnailId}.${c.fileType}`,
             imageSrc: `/images/${c.imageId}.${c.fileType}`
         }))
+        collection.artworks = formattedArtWork;
+        collection.cover.thumbnailSrc = `/images/${collection.cover.thumbnailId}.${collection.cover.fileType}`
         console.log(`formattedArtwork: ${JSON.stringify(formattedArtWork)}`)
-        res.render('admin/edit-collection', {formattedArtWork, admin:true})
+        res.render('admin/edit-collection', {collection, admin:true})
     })
     .delete(async(req, res) => {
         const {collectionName} = req.params;

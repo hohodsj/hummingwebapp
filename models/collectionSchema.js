@@ -25,6 +25,10 @@ const CollectionSchema = new Schema({
         type: Schema.Types. ObjectId,
         ref: 'DescriptionSchema'
     },
+    isHide: {
+        type: Boolean,
+        delete: false
+    },
     updateDate: {
         type: Date
     }
