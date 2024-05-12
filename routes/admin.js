@@ -78,7 +78,7 @@ router.post('/reorder/portfolio', isLoggedIn, async(req, res) => {
         const collectionOrder = collectionOrders[i];
         CollectionSchema.findOneAndUpdate(
             {collectionName: collectionOrder}, 
-            {$set: {order: i}},
+            {$set: {order: collectionOrders.length - i - 1}}, // reverse order ex. test3 shows on the top but we want the last index assign
                 function (err, docs) {
                 if(err) {
                     req.flash('error', `Unable to update ${collectionOrder} , Error: ${err}`);
