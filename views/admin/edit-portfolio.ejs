@@ -3,10 +3,10 @@
 <!-- Hover with text and link example -->
 <!-- https://www.youtube.com/watch?v=eTrpkJVwmaw&ab_channel=SonarSystems -->
 <!-- https://github.com/SonarSystems/Bootstrap-5-Tutorial-Source-Code/blob/132d128161876b295fc1f4e6ce402ef14fc9d246/Code/%5B3%5D%20Components/Card%20Masonry%20Layout/index.html#L16 -->
-<p>Showing art works</p>
+<h1>Showing art works</h1>
 <!-- <div class="row row-cols-1 row-cols-md-2 g-4" id="grid-card" data-masonry='{"percentPosition": true,  "itemSelector": ".col" }'> -->
 <div class="row row-cols-1 row-cols-md-2 g-4" id="grid-card" data-masonry='{"percentPosition": true,  "itemSelector": ".col" }'>
-    <% for(let collection of formattedCollections) { %>
+    <% for(let collection of formattedShowCollections) { %>
         <div class="col d-flex align-items-center" data-id="<%= collection.order%>"> <!-- data-id is to check order coming from db -->
             <a href="/admin/collection/<%= collection.collectionName%> " title="Click To View Series" >
                 <img src="<%= collection.src%>" class="card-img-top">
@@ -15,13 +15,36 @@
                 <i class="glyphicon glyphicon-th"></i>
             </span>
             <form action="/admin/hide/true/collection/<%= collection.collectionName %>?_method=PATCH" method="POST" class="delete_button">
-                <button type="btn" class="btn btn-light" value="<%= collection.collectionName%>" style="display:block; position: absolute; bottom: 3px; right: 15px; overflow:hidden"><i class="fa-solid fa-eye"></i></button>
+                <button type="btn" class="btn btn-light" value="<%= collection.collectionName%>" style="display:block; position: absolute; bottom: 3px; right: 15px; overflow:hidden"><i class="fa-solid fa-eye-slash"></i></button>
             </form>
             <form action="/admin/collection/<%= collection.collectionName %>?_method=DELETE" method="POST" class="delete_button">
                 <button type="btn" class="btn btn-danger" value="<%= collection.collectionName%>" style="display:block; position: absolute; top: 3px; right: 15px; overflow:hidden"><i class="fa fa-times"></i></button>
             </form>
         </div>
     <% } %> 
+</div>
+
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-1 border-bottom mt-1"></div>
+
+
+<h1>Hiding art works</h1>
+<div class="row row-cols-1 row-cols-md-2 g-4" id="not-show-grid-card" data-masonry='{"percentPosition": true,  "itemSelector": ".col" }'>
+  <% for(let collection of formattedHideCollections) { %>
+      <div class="col d-flex align-items-center" data-id="<%= collection.order%>"> <!-- data-id is to check order coming from db -->
+          <a href="/admin/collection/<%= collection.collectionName%> " title="Click To View Series" >
+              <img src="<%= collection.src%>" class="card-img-top">
+          </a>
+          <span class="overlay-text" style="position: absolute; text-align: center; width: 100%;"><%=collection.collectionName%><br/>
+              <i class="glyphicon glyphicon-th"></i>
+          </span>
+          <form action="/admin/hide/false/collection/<%= collection.collectionName %>?_method=PATCH" method="POST" class="delete_button">
+              <button type="btn" class="btn btn-light" value="<%= collection.collectionName%>" style="display:block; position: absolute; bottom: 3px; right: 15px; overflow:hidden"><i class="fa-solid fa-eye"></i></button>
+          </form>
+          <form action="/admin/collection/<%= collection.collectionName %>?_method=DELETE" method="POST" class="delete_button">
+              <button type="btn" class="btn btn-danger" value="<%= collection.collectionName%>" style="display:block; position: absolute; top: 3px; right: 15px; overflow:hidden"><i class="fa fa-times"></i></button>
+          </form>
+      </div>
+  <% } %> 
 </div>
 
 
@@ -34,15 +57,15 @@
     <button type="btn" class="btn btn-danger">Delete All</button>
 </form> -->
 <!-- Not show reorder display -->
-<!-- <form action="/admin/reorder/portfolio" method="POST" class="">
+<form action="/admin/reorder/portfolio" method="POST" class="">
     <input type="text" id="orders" name="orders" style="display:none">
     <button type="btn" class="btn btn-success" style="display:none" id="save-button">Save</button>
-</form> -->
+</form>
 
-<form action="/admin/reorder/portfolio" method="POST" class="">
+<!-- <form action="/admin/reorder/portfolio" method="POST" class="">
   <input type="text" id="orders" name="orders">
   <button type="btn" class="btn btn-success" id="save-button">Save</button>
-</form>
+</form> -->
 
 <button type="button" class="btn btn-success translate-middle-y fixed-top" data-bs-toggle="modal" data-bs-target="#exampleModal" data-bs-whatever="@mdo" style="width:50px; top: 50%;">+</button>
 
@@ -76,6 +99,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 <script>
+  // find id=grid-card and apply sortable
     Sortable.create(document.getElementById('grid-card'), {
             group: 'shared',
             animation: 150,
