@@ -24,8 +24,10 @@ router.get('/portfolio', isLoggedIn, async(req, res) => {
     const hideCollections = await CollectionSchema.find({isHide: true}).populate('cover').sort({order:-1});
     // save images to local
     const imageInfos = showCollections.map(collection => ({id: collection.cover.thumbnailId, type:collection.cover.fileType}))
+    const hideInfos = hideCollections.map(collection => ({id: collection.cover.thumbnailId, type:collection.cover.fileType}))
     // background process of downloading images
     await downloadImages(imageInfos)
+    await downloadImages(hideInfos)
 
     // dynamically selecting if select google drive url or from disk
     const path = './public/images'
