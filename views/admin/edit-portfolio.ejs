@@ -14,12 +14,16 @@
             <span class="overlay-text" style="position: absolute; text-align: center; width: 100%;"><%=collection.collectionName%><br/>
                 <i class="glyphicon glyphicon-th"></i>
             </span>
+            <form action="/admin/hide/true/collection/<%= collection.collectionName %>?_method=PATCH" method="POST" class="delete_button">
+                <button type="btn" class="btn btn-light" value="<%= collection.collectionName%>" style="display:block; position: absolute; bottom: 3px; right: 15px; overflow:hidden"><i class="fa-solid fa-eye"></i></button>
+            </form>
             <form action="/admin/collection/<%= collection.collectionName %>?_method=DELETE" method="POST" class="delete_button">
                 <button type="btn" class="btn btn-danger" value="<%= collection.collectionName%>" style="display:block; position: absolute; top: 3px; right: 15px; overflow:hidden"><i class="fa fa-times"></i></button>
             </form>
         </div>
     <% } %> 
 </div>
+
 
 
 <!-- <form action="/admin/create-collection" class="fixed-bottom" method="GET">
@@ -29,9 +33,15 @@
 <!-- <form action="/admin/all?_method=DELETE" method="POST" class="position-absolute bottom-0 start-50 translate-middle-x">
     <button type="btn" class="btn btn-danger">Delete All</button>
 </form> -->
-<form action="/admin/reorder/portfolio" method="POST" class="">
+<!-- Not show reorder display -->
+<!-- <form action="/admin/reorder/portfolio" method="POST" class="">
     <input type="text" id="orders" name="orders" style="display:none">
     <button type="btn" class="btn btn-success" style="display:none" id="save-button">Save</button>
+</form> -->
+
+<form action="/admin/reorder/portfolio" method="POST" class="">
+  <input type="text" id="orders" name="orders">
+  <button type="btn" class="btn btn-success" id="save-button">Save</button>
 </form>
 
 <button type="button" class="btn btn-success translate-middle-y fixed-top" data-bs-toggle="modal" data-bs-target="#exampleModal" data-bs-whatever="@mdo" style="width:50px; top: 50%;">+</button>

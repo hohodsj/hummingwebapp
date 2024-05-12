@@ -293,6 +293,23 @@ router.delete('/artwork/:artworkId', isLoggedIn, async(req, res) => {
     })  
 })
 
+router.patch("/hide/:isHide/collection/:collectionName", isLoggedIn, async(req, res) => {
+    console.log("hidding")
+    const collectionName = req.params.collectionName;
+    const isHide = req.params.isHide === 'true';
+    CollectionSchema.findOneAndUpdate(
+        {collectionName: collectionName},
+        {$set: {isHide: isHide}},
+        function(err, docs) {
+            if (err) {
+                console.log(`err when hide: ${err}`)
+                req.flash('error', `Unable to ${isHide ? "hide" : "unhide"} collection, Error: ${err}`);
+            }
+        }
+    )
+    res.redirect(`/admin/portfolio`)
+})
+
 router.get('*', isLoggedIn, (req, res) => {
     res.status(404).render('admin/admin-error');
 })
