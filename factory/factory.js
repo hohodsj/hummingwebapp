@@ -40,6 +40,7 @@ module.exports.createCollection = (collectionName, cover, order, artworks, descr
         order: order,
         artworks: artworks,
         description: description,
-        updateDate: new Date()
+        updateDate: new Date(),
+        isHide: false
     })
 }

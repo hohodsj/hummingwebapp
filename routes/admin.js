@@ -15,26 +15,36 @@ const {uploadCleanup} = require('../utils/uploadCleanup');
 const {createArtwork, createDescription, createCollection} = require('../factory/factory');
 const passport = require('passport');
 const {generateImageAsync} = require('../utils/coverImgGenerator')
-const {downloadImages} = require('../utils/googleDriveUtil')
+const {downloadImages} = require('../utils/googleDriveUtil');
+const collectionSchema = require('../models/collectionSchema');
 
 
 router.get('/portfolio', isLoggedIn, async(req, res) => {
-    const collections = await CollectionSchema.find({}).populate('cover').sort({order:-1});
+    const showCollections = await CollectionSchema.find({$or: [{isHide: false}, {isHide: null}]}).populate('cover').sort({order:-1});
+    const hideCollections = await CollectionSchema.find({isHide: true}).populate('cover').sort({order:-1});
     // save images to local
-    const imageInfos = collections.map(collection => ({id: collection.cover.thumbnailId, type:collection.cover.fileType}))
+    const imageInfos = showCollections.map(collection => ({id: collection.cover.thumbnailId, type:collection.cover.fileType}))
+    const hideInfos = hideCollections.map(collection => ({id: collection.cover.thumbnailId, type:collection.cover.fileType}))
     // background process of downloading images
     await downloadImages(imageInfos)
+    await downloadImages(hideInfos)
 
     // dynamically selecting if select google drive url or from disk
     const path = './public/images'
-    const formattedCollections = collections.map(c => ({
+    const formattedShowCollections = showCollections.map(c => ({
+        collectionName : c.collectionName,
+        isHorizontal: c.cover.isHorizontal,
+        src: `/images/${c.cover.thumbnailId}.${c.cover.fileType}`
+    }))
+
+    const formattedHideCollections = hideCollections.map(c => ({
         collectionName : c.collectionName,
         isHorizontal: c.cover.isHorizontal,
         src: `/images/${c.cover.thumbnailId}.${c.cover.fileType}`
     }))
 
     req.flash('success', 'You are now Admin')
-    res.render('admin/edit-portfolio', {formattedCollections, admin:true, success:req.flash("success")});
+    res.render('admin/edit-portfolio', {formattedShowCollections, formattedHideCollections, admin:true, success:req.flash("success")});
 });
 
 router.post('/create-collection', isLoggedIn, createUploadFolder, isCollectionExists, async(req, res) => {
@@ -291,6 +301,62 @@ router.delete('/artwork/:artworkId', isLoggedIn, async(req, res) => {
         }
         res.redirect(`/admin/collection/${artwork.collectionSchema.collectionName}`);
     })  
+})
+
+router.patch("/hide/:isHide/collection/:collectionName", isLoggedIn, async(req, res) => {
+    console.log("hidding")
+    const collectionName = req.params.collectionName;
+    const isHide = req.params.isHide === 'true';
+    const collection = await CollectionSchema.findOne(
+        {collectionName: collectionName}
+    ).clone()
+    if(isHide) {
+        await CollectionSchema.findOneAndUpdate(
+            {collectionName: collectionName},
+            {$set: {isHide: isHide, order: -1}},
+            function(err, docs) {
+                if (err) {
+                    console.log(`err when hide: ${err}`)
+                    req.flash('error', `Unable to ${isHide ? "hide" : "unhide"} collection, Error: ${err}`);
+                }
+            }
+        ).clone()
+        // since we hide one collection, we need to adjust everything that's affected
+        let startChangeOrder = collection.order;
+        const updateCollectionOrder = await CollectionSchema.find({order: {"$gt": startChangeOrder}}, function(err, docs){
+            if(err) {
+                console.log(`Err when finding order after ${startChangeOrder} collection:${collection.collectionName}`)
+            }
+        }).clone()
+        updateCollectionOrder.forEach(updateCollection => {
+            CollectionSchema.findOneAndUpdate(
+                {_id: updateCollection._id},
+                {$set: {isHide: false, order: updateCollection.order - 1}},
+                function(err, docs) {
+                    if(err) {
+                        console.log("error when update order for rest of collections")
+                    }
+                }
+            )
+        });
+    } else {
+        const notHideCollectionCount = await CollectionSchema.count(
+            {isHide: false}
+        ).clone();
+        CollectionSchema.findOneAndUpdate(
+            {_id: collection._id},
+            {$set: {isHide: isHide, order: notHideCollectionCount}},
+            function(err, docs) {
+                if (err) {
+                    console.log(`err when hide: ${err}`)
+                    req.flash('error', `Unable to ${isHide ? "hide" : "unhide"} collection, Error: ${err}`);
+                }
+            }
+        )
+    }
+    
+
+    res.redirect(`/admin/portfolio`)
 })
 
 router.get('*', isLoggedIn, (req, res) => {
