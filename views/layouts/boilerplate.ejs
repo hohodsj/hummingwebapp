@@ -18,6 +18,12 @@
     crossorigin="anonymous"></script>
     <link  href="/fancybox/src/css/jquery.fancybox.min.css" rel="stylesheet">
     <script src="/fancybox/src/js/jquery.fancybox.min.js"></script>
+    <script type='text/javascript'>
+        var link = !!document.querySelector("link[rel='canonical']") ? document.querySelector("link[rel='canonical']") : document.createElement('link');
+        link.setAttribute('rel', 'canonical');
+        link.setAttribute('href', location.protocol + '//' + location.host + location.pathname);
+        document.head.appendChild(link);
+      </script>
   </head>
   <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-W8JWLKJ0F8"></script>
