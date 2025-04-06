@@ -239,15 +239,22 @@ router.route('/collection/:collectionName', isLoggedIn)
         // dynamically selecting if select google drive url or from disk
         const path = './public/images'
         const description = {title: collection.description.title, description: collection.description.description}
-        const formattedArtWork = collection.artworks.map(c => ({
-            ...c,
-            thumbnailSrc: `/images/${c.thumbnailId}.${c.fileType}`,
-            imageSrc: `/images/${c.imageId}.${c.fileType}`
-        }))
-        collection.artworks = formattedArtWork;
+        
+        const formattedArtWork = collection.artworks.map(c => {
+            const artwork = c.toObject(); // convert Mongoose doc to plain JS object
+            const fileType = artwork.fileName?.split('.').pop();
+            return {
+              ...artwork,
+              thumbnailSrc: `/images/${artwork.thumbnailId}.${fileType}`,
+              imageSrc: `/images/${artwork.imageId}.${fileType}`
+            };
+          });
+        // collection.artworks = formattedArtWork.map(artwork => structuredClone(artwork));
+        const collectionObj = collection.toObject(); // Convert the entire collection to a plain object
+        collectionObj.artworks = formattedArtWork; // Assign the formatted artworks
+
         collection.cover.thumbnailSrc = `/images/${collection.cover.thumbnailId}.${collection.cover.fileType}`
-        console.log(`formattedArtwork: ${JSON.stringify(formattedArtWork)}`)
-        res.render('admin/edit-collection', {collection, admin:true})
+        res.render('admin/edit-collection', {collection: collectionObj, admin:true})
     })
     .delete(async(req, res) => {
         const {collectionName} = req.params;
