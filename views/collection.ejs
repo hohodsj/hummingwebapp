@@ -11,7 +11,7 @@
 <% for(let artwork of formattedArtWork) {%> 
     <div class="col">
         <div class="thumbnail">
-            <a data-fancybox="gallery" href="<%= artwork.thumbnailSrc%>" title="Click To Enlarge"><img src="<%= artwork.imageSrc%>" class="img-thumbnail p-0" alt="By Humming Sang">
+            <a data-fancybox="gallery" href="<%= artwork.thumbnailSrc%>" title="Click To Enlarge"><img src="<%= artwork.imageSrc%>" class="img-thumbnail p-0" alt="By Humming Sang" loading="lazy">
                 <div class="overlay-pic"></div>
             </a>
         </div>

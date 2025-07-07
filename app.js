@@ -25,6 +25,7 @@ const useragent = require('express-useragent')
 
 const adminRoutes = require('./routes/admin');
 
+
 const dbUrl = process.env.DB_URL || "mongodb://localhost:27017/hummingsang-portfolio";
 mongoose.connect(dbUrl);
 const db = mongoose.connection;
@@ -43,6 +44,7 @@ app.use(bodyParser.text());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(useragent.express())
 app.use(methodOverride('_method'));
+
 
 const secret = process.env.SECRET || 'ThisSecretOnlyWorksInDevEnv';
 
