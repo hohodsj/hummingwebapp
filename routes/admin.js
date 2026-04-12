@@ -13,10 +13,8 @@ const catchAsync = require('../utils/catchAsync');
 const {zip} = require('../utils/zip');
 const {uploadCleanup} = require('../utils/uploadCleanup');
 const {createArtwork, createDescription, createCollection} = require('../factory/factory');
-const passport = require('passport');
 const {generateImageAsync} = require('../utils/coverImgGenerator')
 const {downloadImages} = require('../utils/googleDriveUtil');
-const collectionSchema = require('../models/collectionSchema');
 
 
 router.get('/portfolio', isLoggedIn, async(req, res) => {
@@ -29,8 +27,6 @@ router.get('/portfolio', isLoggedIn, async(req, res) => {
     await downloadImages(imageInfos)
     await downloadImages(hideInfos)
 
-    // dynamically selecting if select google drive url or from disk
-    const path = './public/images'
     const formattedShowCollections = showCollections.map(c => ({
         collectionName : c.collectionName,
         isHorizontal: c.cover.isHorizontal,

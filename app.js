@@ -16,9 +16,7 @@ const UserSchema = require('./models/userSchema');
 const methodOverride = require('method-override');
 const bodyParser = require('body-parser');
 const {buildSitemaps} = require('express-sitemap-xml');
-const ExpressError = require('./utils/ExpressError');
 const {downloadImages} = require('./utils/googleDriveUtil');
-const fs = require("fs")
 const {periodicRemove} = require('./utils/deleteUtils')
 const cron = require('node-cron')
 const useragent = require('express-useragent')
@@ -83,13 +81,6 @@ passport.use(new GoogleStrategy({
 ));
 passport.serializeUser(UserSchema.serializeUser());
 passport.deserializeUser(UserSchema.deserializeUser());
-// passport.serializeUser(function(user, done){
-//     done(null, user);
-// })
-
-// passport.deserializeUser(function(user, done){
-//     done(null, user);
-// })
 
 // cron clean up - only run in production environments
 if (process.env.NODE_ENV !== 'test') {
@@ -109,13 +100,9 @@ app.use((req, res, next) => {
 app.get('/', catchAsync(async (req, res) => {
     const isMobile = req.useragent['isMobile']
     const collections = await CollectionSchema.find({$or: [{isHide: false}, {isHide: null}]}).populate('cover').sort({order:-1});
-    // save images to local
     const imageInfos = collections.map(collection => ({id: collection.cover.thumbnailId, type:collection.cover.fileType}))
-    // background process of downloading images
     await downloadImages(imageInfos)
 
-    // dynamically selecting if select google drive url or from disk
-    const path = './public/images'
     const formattedCollections = collections.map(c => ({
         collectionName : c.collectionName,
         isHorizontal: c.cover.isHorizontal,
@@ -159,13 +146,9 @@ app.get('/collection/:collectionName', catchAsync(async (req, res) => {
     const collectionName = req.params.collectionName;
     const options = {sort: [{'order': 'asc'}]};
     const collection = await CollectionSchema.findOne({collectionName: collectionName}).populate({path: 'artworks', options}).populate('description');
-    // const artworks = collection.artworks;
     const thumbnailImageInfos = collection.artworks.map(artwork => ({id: artwork.thumbnailId, type:artwork.fileType}))
     const actualImageInfos = collection.artworks.map(artwork => ({id: artwork.imageId, type:artwork.fileType}))
-    // download in background
     await downloadImages([...thumbnailImageInfos, ...actualImageInfos])
-     // dynamically selecting if select google drive url or from disk
-    const path = './public/images'
     const description = {title: collection.description.title, description: collection.description.description}
     const formattedArtWork = collection.artworks.map(c => ({
         thumbnailSrc: `/images/${c.thumbnailId}.${c.fileType}`,
@@ -183,7 +166,6 @@ app.get('/sitemap.xml', async (req,res) => {
     const collections = await CollectionSchema.find({});
     const urls = collections.map(collection => `/collection/${collection.collectionName}`)
     const sitemaps = await buildSitemaps(['/', '/about','/contact'].concat(urls), 'https://hummingsang.com');
-    console.log(sitemaps);
     res.header('Content-Type', 'application/xml');
     res.send(sitemaps['/sitemap.xml']);
 });
