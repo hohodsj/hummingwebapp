@@ -7,11 +7,17 @@ const fs = require("fs")
 // remove collection from google drive
 module.exports.removeCollection = async (collection) => {
     const cad = await CollectionSchema.findOne({collectionName: collection}).populate('cover').populate('artworks').populate('description');
-    const ids = cad.artworks.reduce( (acc, cur) => {
-        ArtworkSchema.remove({_id: cur._id});
-        return acc.concat([cur.thumbnailId, cur.imageId]);
-    }, [cad.cover.thumbnailId, cad.cover.imageId])
-    ArtworkSchema.remove({_id: cad.cover._id});
+    const ids = [];
+    
+    // Collect all image IDs and delete artworks
+    for (let cur of cad.artworks) {
+        await ArtworkSchema.deleteOne({_id: cur._id});
+        ids.push(cur.thumbnailId, cur.imageId);
+    }
+    
+    // Delete cover
+    ids.push(cad.cover.thumbnailId, cad.cover.imageId);
+    await ArtworkSchema.deleteOne({_id: cad.cover._id});
     console.log(ids);
     try{
         await googleDriveUtil.deleteImageWithIds(ids);

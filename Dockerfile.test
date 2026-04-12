@@ -1,0 +1,11 @@
+FROM node:18
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm install
+
+COPY . .
+
+# Wait for MongoDB to be ready, then run tests
+CMD ["sh", "-c", "NODE_ENV=test sleep 3 && npm run test:e2e"]

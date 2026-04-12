@@ -7,6 +7,8 @@ See the [project page](http://fancyapps.com/fancybox/3/) for documentation and a
 
 Follow [@thefancyapps](//twitter.com/thefancyapps) for updates.
 
+# To run tests
+docker compose -f docker-compose.test.yml up --build --abort-on-container-exit
 
 ## Quick start
 
