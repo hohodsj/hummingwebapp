@@ -8,11 +8,9 @@ const passport = require('passport');
 const LocalStrategy = require('passport-local');
 const methodOverride = require('method-override');
 const bodyParser = require('body-parser');
-const {buildSitemaps} = require('express-sitemap-xml');
-const {downloadImages} = require('./utils/googleDriveUtil');
-const {periodicRemove} = require('./utils/deleteUtils')
-const cron = require('node-cron')
-const useragent = require('express-useragent')
+const { periodicRemove } = require('./utils/deleteUtils');
+const cron = require('node-cron');
+const useragent = require('express-useragent');
 const mongoose = require('mongoose');
 
 // Import configuration modules
@@ -20,12 +18,8 @@ const connectDB = require('./config/db');
 const sessionConfig = require('./config/session');
 const configurePassport = require('./config/passport');
 
-// Import database and route models
-const catchAsync = require('./utils/catchAsync');
-const { formatCollectionForPortfolio, formatArtworkForDisplay } = require('./utils/formatArtwork');
-const ArtWorkSchema = require('./models/artworkSchema');
-const CollectionSchema = require('./models/collectionSchema');
-const DescriptionSchema = require('./models/descriptionSchema');
+// Import routes
+const publicRoutes = require('./routes/public');
 const adminRoutes = require('./routes/admin');
 
 // Configure Mongoose
@@ -69,70 +63,31 @@ app.use((req, res, next) => {
     next();
 });
 
-app.get('/', catchAsync(async (req, res) => {
-    const isMobile = req.useragent['isMobile']
-    const collections = await CollectionSchema.find({$or: [{isHide: false}, {isHide: null}]}).populate('cover').sort({order:-1});
-    const imageInfos = collections.map(collection => ({id: collection.cover.thumbnailId, type:collection.cover.fileType}))
-    await downloadImages(imageInfos)
-    const formattedCollections = collections.map(formatCollectionForPortfolio);
-    res.render('portfolio', {formattedCollections, isMobile});
-}));
+// Mount public routes (portfolio, about, contact, collections, etc.)
+app.use('/', publicRoutes);
 
-app.get('/about', async (req, res) => {
-    const descriptions = await DescriptionSchema.find({category: 'CV'}).sort({order: 1});
-    res.render('about', {descriptions});
-});
-
-app.get('/contact', async (req, res) => {
-    const descriptions = await DescriptionSchema.find({category: 'Social'}).sort({order: 1});
-    res.render('contact', {descriptions});
-});
-
+// Authentication routes
 app.get('/login', (req, res) => {
-    res.render('login')
+    res.render('login');
 });
 
-app.post('/login', passport.authenticate('local', {failureFlash: true, failureRedirect:'/login'}), (req, res) => {
+app.post('/login', passport.authenticate('local', { failureFlash: true, failureRedirect: '/login' }), (req, res) => {
     res.redirect('/admin/portfolio');
-})
+});
 
 app.get('/auth/google', 
-    passport.authenticate('google', {scope: ['email', 'profile']})
+    passport.authenticate('google', { scope: ['email', 'profile'] })
 );
 
 app.get('/google/callback', 
-            passport.authenticate('google', {
-                successRedirect: '/admin/portfolio',
-                failureRedirect: '/',
-            })
-)
+    passport.authenticate('google', {
+        successRedirect: '/admin/portfolio',
+        failureRedirect: '/',
+    })
+);
 
+// Mount admin routes
 app.use('/admin', adminRoutes);
-
-app.get('/collection/:collectionName', catchAsync(async (req, res) => {
-    const collectionName = req.params.collectionName;
-    const options = {sort: [{'order': 'asc'}]};
-    const collection = await CollectionSchema.findOne({collectionName: collectionName}).populate({path: 'artworks', options}).populate('description');
-    const thumbnailImageInfos = collection.artworks.map(artwork => ({id: artwork.thumbnailId, type:artwork.fileType}))
-    const actualImageInfos = collection.artworks.map(artwork => ({id: artwork.imageId, type:artwork.fileType}))
-    await downloadImages([...thumbnailImageInfos, ...actualImageInfos])
-    const description = {title: collection.description.title, description: collection.description.description}
-    const formattedArtWork = collection.artworks.map(formatArtworkForDisplay);
-    res.render('collection', {description, formattedArtWork});
-}));
-
-app.get('/robots.txt', (req, res) => {
-    res.type('text/plain');
-    res.send("User-agent: *\nAllow: /");
-});
-
-app.get('/sitemap.xml', async (req,res) => {
-    const collections = await CollectionSchema.find({});
-    const urls = collections.map(collection => `/collection/${collection.collectionName}`)
-    const sitemaps = await buildSitemaps(['/', '/about','/contact'].concat(urls), 'https://hummingsang.com');
-    res.header('Content-Type', 'application/xml');
-    res.send(sitemaps['/sitemap.xml']);
-});
 
 app.get('*', (req, res, next) => {
     res.status(404).render('error');
