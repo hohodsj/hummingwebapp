@@ -20,6 +20,7 @@ const configurePassport = require('./config/passport');
 
 // Import routes
 const publicRoutes = require('./routes/public');
+const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
 
 // Configure Mongoose
@@ -66,25 +67,8 @@ app.use((req, res, next) => {
 // Mount public routes (portfolio, about, contact, collections, etc.)
 app.use('/', publicRoutes);
 
-// Authentication routes
-app.get('/login', (req, res) => {
-    res.render('login');
-});
-
-app.post('/login', passport.authenticate('local', { failureFlash: true, failureRedirect: '/login' }), (req, res) => {
-    res.redirect('/admin/portfolio');
-});
-
-app.get('/auth/google', 
-    passport.authenticate('google', { scope: ['email', 'profile'] })
-);
-
-app.get('/google/callback', 
-    passport.authenticate('google', {
-        successRedirect: '/admin/portfolio',
-        failureRedirect: '/',
-    })
-);
+// Mount authentication routes (login, Google OAuth)
+app.use('/', authRoutes);
 
 // Mount admin routes
 app.use('/admin', adminRoutes);
