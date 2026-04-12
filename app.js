@@ -10,7 +10,7 @@ const ArtWorkSchema = require('./models/artworkSchema');
 const CollectionSchema = require('./models/collectionSchema');
 const DescriptionSchema = require('./models/descriptionSchema');
 const passport = require('passport');
-// const LocalStrategy = require('passport-local');
+const LocalStrategy = require('passport-local');
 const GoogleStrategy = require('passport-google-oauth2').Strategy;
 const UserSchema = require('./models/userSchema');
 const methodOverride = require('method-override');
@@ -66,7 +66,7 @@ app.use(flash());
 
 app.use(passport.initialize());
 app.use(passport.session());
-// passport.use(new LocalStrategy(UserSchema.authenticate()));
+passport.use(new LocalStrategy(UserSchema.authenticate()));
 // Google Drive project share same client id and secret
 passport.use(new GoogleStrategy({
     clientID:     process.env.GOOGLE_DRIVE_CLIENT_ID,
@@ -91,11 +91,13 @@ passport.deserializeUser(UserSchema.deserializeUser());
 //     done(null, user);
 // })
 
-// cron clean up
-cron.schedule('0 6 * * *', async () => {
-    console.log(`Running cron job to cleanup at 6am`)
-    await periodicRemove();
-})
+// cron clean up - only run in production environments
+if (process.env.NODE_ENV !== 'test') {
+    cron.schedule('0 6 * * *', async () => {
+        console.log(`Running cron job to cleanup at 6am`)
+        await periodicRemove();
+    })
+}
 
 app.use((req, res, next) => {
     res.locals.activeLocation = req.path;
@@ -137,8 +139,6 @@ app.get('/login', (req, res) => {
 });
 
 app.post('/login', passport.authenticate('local', {failureFlash: true, failureRedirect:'/login'}), (req, res) => {
-    console.log('post login');
-    console.log(req);
     res.redirect('/admin/portfolio');
 })
 
@@ -193,6 +193,10 @@ app.get('*', (req, res, next) => {
 });
 
 const port = process.env.PORT || 3000;
-app.listen(port, () => {
-    console.log(`Listening on port ${port}`);
-})
+if (require.main === module) {
+    app.listen(port, () => {
+        console.log(`Listening on port ${port}`);
+    });
+}
+
+module.exports = app;

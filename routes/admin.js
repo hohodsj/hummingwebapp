@@ -136,7 +136,7 @@ router.post('/update/collection/:collectionId/:collectionName', isLoggedIn, uplo
             })
         }
     }
-    if(req.files.cover) {
+    if(req.files && req.files.cover) {
         try{
             const file = req.files.cover[0];
             const [thumbnailId, imageId, isHorizontal] = await googleDriveUtil.uploadImageToDrive(file.buffer, file.originalname.split('.').pop());
@@ -152,7 +152,7 @@ router.post('/update/collection/:collectionId/:collectionName', isLoggedIn, uplo
         
     }
     
-    if(req.files.image) {
+    if(req.files && req.files.image) {
         for(let i = 0; i < req.files.image.length; i++) {
             try{
                 const file = req?.files?.image[i];
