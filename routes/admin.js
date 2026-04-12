@@ -58,23 +58,13 @@ router.post('/create-collection', isLoggedIn, createUploadFolder, isCollectionEx
 })
 
 router.post('/reorder/portfolio', isLoggedIn, async(req, res) => {
-    // use profile name since order can have concurrency issue without using await
     const collectionOrders = req.body.orders.split(',');
-    // collectionOrders contains list of profile names in the new order
-    console.log(collectionOrders);
-
-    for(let i = 0; i < collectionOrders.length; i++) {
+    for (let i = 0; i < collectionOrders.length; i++) {
         const collectionOrder = collectionOrders[i];
-        CollectionSchema.findOneAndUpdate(
-            {collectionName: collectionOrder}, 
-            {$set: {order: collectionOrders.length - i - 1}}, // reverse order ex. test3 shows on the top but we want the last index assign
-                function (err, docs) {
-                if(err) {
-                    req.flash('error', `Unable to update ${collectionOrder} , Error: ${err}`);
-                } else{
-                    console.log(`reordered ${collectionOrder} `)
-                }
-        })
+        await CollectionSchema.findOneAndUpdate(
+            { collectionName: collectionOrder },
+            { $set: { order: collectionOrders.length - i - 1 } }
+        );
     }
     res.redirect(`/admin/portfolio`);
 })
@@ -87,17 +77,10 @@ router.post('/update/collection/:collectionId/:collectionName', isLoggedIn, uplo
     const descriptionId = collection.description._id;
     const collectionId = req.params.collectionId;
     const collectionName = req.params.collectionName;
-    DescriptionSchema.findOneAndUpdate(
+    await DescriptionSchema.findOneAndUpdate(
         {_id: descriptionId},
-        {$set: {title: title, description:description}},
-        function (err, docs) {
-            if(err) {
-                console.log(err)
-            } else {
-                console.log(docs)
-            }
-        }
-    )
+        {$set: {title: title, description:description}}
+    );
     if(req.body.orders) {
         // uses image file name inside of delete button
         const imgFilesOrderArr = req.body.orders.split(',');
@@ -105,14 +88,10 @@ router.post('/update/collection/:collectionId/:collectionName', isLoggedIn, uplo
         for(let i = 0; i < imgFilesOrderArr.length; i++) {
             const imgFile = imgFilesOrderArr[i];
             console.log(`update origin order ${imgFile} to ${i}`);
-            ArtWorkSchema.findOneAndUpdate(
+            await ArtWorkSchema.findOneAndUpdate(
                 {collectionSchema: collectionId, fileName: imgFile}, 
-                {$set: {order: i}},
-                function (err, docs) {
-                if(err) {
-                    req.flash('error', `Unable to update file ${imgFile} to order ${i} , Error: ${err}`);
-                } 
-            })
+                {$set: {order: i}}
+            );
         }
     }
     if(req.files && req.files.cover) {
@@ -122,7 +101,7 @@ router.post('/update/collection/:collectionId/:collectionName', isLoggedIn, uplo
             const cover = createArtwork(thumbnailId, imageId, file.originalname, isHorizontal, -1, collection);
             await cover.save();
             await googleDriveUtil.deleteImageWithIds([collection.cover.thumbnailId, collection.cover.imageId]);
-            ArtWorkSchema.remove({_id: collection.cover._id});
+            await ArtWorkSchema.deleteOne({_id: collection.cover._id});
             collection.cover = cover;
             await collection.save();
         }catch(e) {
@@ -141,16 +120,9 @@ router.post('/update/collection/:collectionId/:collectionName', isLoggedIn, uplo
                 const actualOrder = artworksCount - 1;
                 const artwork = createArtwork(thumbnailId, imageId, file.originalname, isHorizontal, actualOrder, collection);
                 await artwork.save();
-                CollectionSchema.updateOne(
+                await CollectionSchema.updateOne(
                     {_id: collectionId},
-                    {$push: {artworks: artwork}},
-                    function (err, docs) {
-                        if(err) {
-                            console.log(err)
-                        } else {
-                            console.log(docs)
-                        }
-                    }
+                    {$push: {artworks: artwork}}
                 );
             } catch(error) {
                 console.log(`Error when updating image: ${file.originalname} error:${error} `)
@@ -168,7 +140,7 @@ router.route('/about', isLoggedIn)
     })
     .post(async(req, res) => {
         const titleDescriptionPair = zip([req.body.title, req.body.description]);
-        await DescriptionSchema.remove({category: 'CV'});
+        await DescriptionSchema.deleteMany({category: 'CV'});
         for(let i = 0; i < titleDescriptionPair.length; i++) {
             const titleDescription = titleDescriptionPair[i];
             if(titleDescription[0] && titleDescription[1]) {
@@ -187,7 +159,7 @@ router.route('/contact', isLoggedIn)
     })
     .post(async(req, res) => {
         const titleDescriptionPair = zip([req.body.title, req.body.description]);
-        await DescriptionSchema.remove({category: 'Social'});
+        await DescriptionSchema.deleteMany({category: 'Social'});
         for(let i = 0; i < titleDescriptionPair.length; i++) {
             const titleDescription = titleDescriptionPair[i];
             if(titleDescription[0] && titleDescription[1]) {
@@ -257,27 +229,18 @@ router.delete('/artwork/:artworkId', isLoggedIn, async(req, res) => {
     const count = await ArtWorkSchema.countDocuments({collectionSchema: collectionId}); // count cover, remove 1 img same length as expected
     for(let i = order + 1; i < count; i++) {
         const updatedOrder = i - 1; // shift everything after to a position before
-        ArtWorkSchema.findOneAndUpdate(
+        await ArtWorkSchema.findOneAndUpdate(
             {collectionSchema: collectionId, order: i},
-            {$set: {order: updatedOrder}},
-            function(err, docs) {
-                if(err) console.log(err)
-                else console.log(docs)
-            }
-        )
+            {$set: {order: updatedOrder}}
+        );
     }
     
-    CollectionSchema.findOneAndUpdate(
+    await CollectionSchema.findOneAndUpdate(
         {_id: collectionId}, 
-        {$pull: {artworks: artworkId}},
-         function (err, docs) {
-        if(err) {
-            req.flash('error', `Unable to remove ${artwork.fileName}, Error: ${err}`);
-        } else {
-            req.flash('success', `Remove ${artwork.fileName} successfully`);
-        }
-        res.redirect(`/admin/collection/${artwork.collectionSchema.collectionName}`);
-    })  
+        {$pull: {artworks: artworkId}}
+    );
+    req.flash('success', `Remove ${artwork.fileName} successfully`);
+    res.redirect(`/admin/collection/${artwork.collectionSchema.collectionName}`);  
 })
 
 router.patch("/hide/:isHide/collection/:collectionName", isLoggedIn, async(req, res) => {
@@ -286,53 +249,29 @@ router.patch("/hide/:isHide/collection/:collectionName", isLoggedIn, async(req, 
     const isHide = req.params.isHide === 'true';
     const collection = await CollectionSchema.findOne(
         {collectionName: collectionName}
-    ).clone()
+    );
     if(isHide) {
         await CollectionSchema.findOneAndUpdate(
             {collectionName: collectionName},
-            {$set: {isHide: isHide, order: -1}},
-            function(err, docs) {
-                if (err) {
-                    console.log(`err when hide: ${err}`)
-                    req.flash('error', `Unable to ${isHide ? "hide" : "unhide"} collection, Error: ${err}`);
-                }
-            }
-        ).clone()
+            {$set: {isHide: isHide, order: -1}}
+        );
         // since we hide one collection, we need to adjust everything that's affected
         let startChangeOrder = collection.order;
-        const updateCollectionOrder = await CollectionSchema.find({order: {"$gt": startChangeOrder}}, function(err, docs){
-            if(err) {
-                console.log(`Err when finding order after ${startChangeOrder} collection:${collection.collectionName}`)
-            }
-        }).clone()
-        updateCollectionOrder.forEach(updateCollection => {
-            CollectionSchema.findOneAndUpdate(
+        const updateCollectionOrder = await CollectionSchema.find({order: {"$gt": startChangeOrder}});
+        for(let updateCollection of updateCollectionOrder) {
+            await CollectionSchema.findOneAndUpdate(
                 {_id: updateCollection._id},
-                {$set: {isHide: false, order: updateCollection.order - 1}},
-                function(err, docs) {
-                    if(err) {
-                        console.log("error when update order for rest of collections")
-                    }
-                }
-            )
-        });
+                {$set: {isHide: false, order: updateCollection.order - 1}}
+            );
+        }
     } else {
-        const notHideCollectionCount = await CollectionSchema.count(
-            {isHide: false}
-        ).clone();
-        CollectionSchema.findOneAndUpdate(
+        const notHideCollectionCount = await CollectionSchema.countDocuments({ isHide: false });
+        await CollectionSchema.findOneAndUpdate(
             {_id: collection._id},
-            {$set: {isHide: isHide, order: notHideCollectionCount}},
-            function(err, docs) {
-                if (err) {
-                    console.log(`err when hide: ${err}`)
-                    req.flash('error', `Unable to ${isHide ? "hide" : "unhide"} collection, Error: ${err}`);
-                }
-            }
-        )
+            {$set: {isHide: isHide, order: notHideCollectionCount}}
+        );
     }
     
-
     res.redirect(`/admin/portfolio`)
 })
 
