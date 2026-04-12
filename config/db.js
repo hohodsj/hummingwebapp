@@ -1,6 +1,15 @@
 const mongoose = require('mongoose');
 
-const dbUrl = process.env.DB_URL || 'mongodb://localhost:27017/hummingsang-portfolio';
+const getDbUrl = () => {
+   if (process.env.DB_URL) {
+       return process.env.DB_URL;
+   }
+   
+   const dbName = process.env.NODE_ENV === 'test' ? 'hummingsang-test' : 'hummingsang-portfolio';
+   return `mongodb://localhost:27017/${dbName}`;
+};
+
+const dbUrl = getDbUrl();
 
 const connectDB = async () => {
    await mongoose.connect(dbUrl);

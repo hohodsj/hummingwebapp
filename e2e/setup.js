@@ -1,7 +1,14 @@
 const mongoose = require('mongoose');
 
+const getDbUrl = () => {
+   if (process.env.DB_URL) {
+       return process.env.DB_URL;
+   }
+   return 'mongodb://localhost:27017/hummingsang-test';
+};
+
 beforeAll(async () => {
-   const dbUrl = process.env.DB_URL || 'mongodb://localhost:27018/hummingsang-test';
+   const dbUrl = getDbUrl();
    if (mongoose.connection.readyState === 0) {
        await mongoose.connect(dbUrl);
    }

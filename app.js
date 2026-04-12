@@ -13,6 +13,7 @@ const {downloadImages} = require('./utils/googleDriveUtil');
 const {periodicRemove} = require('./utils/deleteUtils')
 const cron = require('node-cron')
 const useragent = require('express-useragent')
+const mongoose = require('mongoose');
 
 // Import configuration modules
 const connectDB = require('./config/db');
@@ -26,6 +27,9 @@ const ArtWorkSchema = require('./models/artworkSchema');
 const CollectionSchema = require('./models/collectionSchema');
 const DescriptionSchema = require('./models/descriptionSchema');
 const adminRoutes = require('./routes/admin');
+
+// Configure Mongoose
+mongoose.set('strictQuery', false);
 
 // Connect to database
 connectDB();
