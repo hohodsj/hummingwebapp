@@ -6,7 +6,8 @@ module.exports = async () => {
            console.log('MongoDB Memory Server stopped');
        }
    } catch (error) {
-       console.error('Error stopping MongoDB Memory Server:', error);
+       console.error('Error stopping MongoDB:', error);
        throw error;
    }
 };
+
