@@ -15,30 +15,18 @@ const {uploadCleanup} = require('../utils/uploadCleanup');
 const {createArtwork, createDescription, createCollection} = require('../factory/factory');
 const {generateImageAsync} = require('../utils/coverImgGenerator')
 const {downloadImages} = require('../utils/googleDriveUtil');
+const {formatCollectionForPortfolio, formatArtworkForDisplay} = require('../utils/formatArtwork');
 
 
 router.get('/portfolio', isLoggedIn, async(req, res) => {
     const showCollections = await CollectionSchema.find({$or: [{isHide: false}, {isHide: null}]}).populate('cover').sort({order:-1});
     const hideCollections = await CollectionSchema.find({isHide: true}).populate('cover').sort({order:-1});
-    // save images to local
     const imageInfos = showCollections.map(collection => ({id: collection.cover.thumbnailId, type:collection.cover.fileType}))
     const hideInfos = hideCollections.map(collection => ({id: collection.cover.thumbnailId, type:collection.cover.fileType}))
-    // background process of downloading images
     await downloadImages(imageInfos)
     await downloadImages(hideInfos)
-
-    const formattedShowCollections = showCollections.map(c => ({
-        collectionName : c.collectionName,
-        isHorizontal: c.cover.isHorizontal,
-        src: `/images/${c.cover.thumbnailId}.${c.cover.fileType}`
-    }))
-
-    const formattedHideCollections = hideCollections.map(c => ({
-        collectionName : c.collectionName,
-        isHorizontal: c.cover.isHorizontal,
-        src: `/images/${c.cover.thumbnailId}.${c.cover.fileType}`
-    }))
-
+    const formattedShowCollections = showCollections.map(formatCollectionForPortfolio);
+    const formattedHideCollections = hideCollections.map(formatCollectionForPortfolio);
     req.flash('success', 'You are now Admin')
     res.render('admin/edit-portfolio', {formattedShowCollections, formattedHideCollections, admin:true, success:req.flash("success")});
 });
@@ -61,13 +49,8 @@ router.post('/create-collection', isLoggedIn, createUploadFolder, isCollectionEx
     const thumbnailImageInfos = collection.artworks.map(artwork => ({id: artwork.thumbnailId, type:artwork.fileType}))
     const actualImageInfos = collection.artworks.map(artwork => ({id: artwork.imageId, type:artwork.fileType}))
     const coverImageInfos = [{id:collection.cover.thumbnailId, type: collection.cover.fileType}]
-    // download in background
     await downloadImages([...thumbnailImageInfos, ...actualImageInfos, ...coverImageInfos])
-    const formattedArtWork = collection.artworks.map(c => ({
-        ...c,
-        thumbnailSrc: `/images/${c.thumbnailId}.${c.fileType}`,
-        imageSrc: `/images/${c.imageId}.${c.fileType}`
-    }))
+    const formattedArtWork = collection.artworks.map(formatArtworkForDisplay)
     collection.artworks = formattedArtWork;
     collection.cover.thumbnailSrc = `/images/${collection.cover.thumbnailId}.${collection.cover.fileType}`
     
@@ -236,16 +219,7 @@ router.route('/collection/:collectionName', isLoggedIn)
         const path = './public/images'
         const description = {title: collection.description.title, description: collection.description.description}
         
-        const formattedArtWork = collection.artworks.map(c => {
-            const artwork = c.toObject(); // convert Mongoose doc to plain JS object
-            const fileType = artwork.fileName?.split('.').pop();
-            return {
-              ...artwork,
-              thumbnailSrc: `/images/${artwork.thumbnailId}.${fileType}`,
-              imageSrc: `/images/${artwork.imageId}.${fileType}`
-            };
-          });
-        // collection.artworks = formattedArtWork.map(artwork => structuredClone(artwork));
+        const formattedArtWork = collection.artworks.map(formatArtworkForDisplay);
         const collectionObj = collection.toObject(); // Convert the entire collection to a plain object
         collectionObj.artworks = formattedArtWork; // Assign the formatted artworks
 
